@@ -1,0 +1,302 @@
+{
+  "_note": "真实商品数据源。换成你自己的 ERP / 表格导出，只要保持字段同名，服务端会直接读。",
+  "updated_at": "2026-10-30",
+  "items": [
+    {
+      "id": "CF-DRY-0018",
+      "name": "无谷鲜肉成猫粮",
+      "brand": "牧野",
+      "category": "猫粮",
+      "price": 129,
+      "spec": "1.8kg",
+      "audience": "1-3岁室内猫主人",
+      "attributes": {
+        "ingredients": [
+          "鲜鸡肉 38%",
+          "冻干鸡胸肉 8%",
+          "豌豆蛋白",
+          "三文鱼油"
+        ],
+        "functions": [
+          "高蛋白",
+          "无谷低敏",
+          "化毛"
+        ],
+        "protein": "38%",
+        "fat": "16%",
+        "scene": "日常主食",
+        "proof": "粗蛋白 38%，高于国标成猫粮 25% 的下限",
+        "gift": "试吃装 50g × 3",
+        "proof_short": "粗蛋白38%"
+      },
+      "stock": 1860,
+      "warehouse": "华东仓"
+    },
+    {
+      "id": "CF-DRY-0019",
+      "name": "冻干双拼幼猫粮",
+      "brand": "牧野",
+      "category": "猫粮",
+      "price": 159,
+      "spec": "1.5kg",
+      "audience": "2-12月龄幼猫",
+      "attributes": {
+        "ingredients": [
+          "鲜鸡肉 42%",
+          "冻干鸡肉粒 10%",
+          "羊奶粉",
+          "DHA 藻油"
+        ],
+        "functions": [
+          "易消化",
+          "促发育",
+          "适口性好"
+        ],
+        "protein": "40%",
+        "fat": "18%",
+        "scene": "离乳期过渡",
+        "proof": "颗粒直径 5mm，幼猫乳牙咬得动",
+        "gift": "幼猫湿粮 85g × 2",
+        "proof_short": "5mm小颗粒"
+      },
+      "stock": 940,
+      "warehouse": "华东仓"
+    },
+    {
+      "id": "CF-DRY-0021",
+      "name": "室内去毛球成猫粮",
+      "brand": "牧野",
+      "category": "猫粮",
+      "price": 109,
+      "spec": "2kg",
+      "audience": "长毛猫 / 换毛季",
+      "attributes": {
+        "ingredients": [
+          "鸡肉",
+          "糙米",
+          "甜菜粕",
+          "车前子壳"
+        ],
+        "functions": [
+          "排毛球",
+          "控体重",
+          "化毛"
+        ],
+        "protein": "32%",
+        "fat": "13%",
+        "scene": "换毛季日常",
+        "proof": "粗纤维 6%，车前子壳帮助毛球随粪便排出",
+        "gift": "化毛膏 30g",
+        "proof_short": "粗纤维6%"
+      },
+      "stock": 1230,
+      "warehouse": "华北仓"
+    },
+    {
+      "id": "CF-WET-0102",
+      "name": "主食罐 · 鸡肉南瓜",
+      "brand": "牧野",
+      "category": "主食罐",
+      "price": 89,
+      "spec": "170g × 6",
+      "audience": "全阶段成猫",
+      "attributes": {
+        "ingredients": [
+          "鸡肉 55%",
+          "南瓜 8%",
+          "鸡肝",
+          "水分 78%"
+        ],
+        "functions": [
+          "补水",
+          "高适口",
+          "主食级"
+        ],
+        "protein": "11%",
+        "fat": "5%",
+        "scene": "主食搭配 / 拌粮",
+        "proof": "水分 78%，符合 AAFCO 主食罐头营养标准",
+        "gift": "硅胶餐盖 × 2",
+        "proof_short": "水分78%"
+      },
+      "stock": 610,
+      "warehouse": "华东仓"
+    },
+    {
+      "id": "DG-DRY-0033",
+      "name": "三文鱼燕麦成犬粮",
+      "brand": "牧野",
+      "category": "狗粮",
+      "price": 199,
+      "spec": "5kg",
+      "audience": "1-7岁中型犬",
+      "attributes": {
+        "ingredients": [
+          "三文鱼 30%",
+          "燕麦",
+          "鸡脂",
+          "鱼油"
+        ],
+        "functions": [
+          "美毛",
+          "护关节",
+          "低敏"
+        ],
+        "protein": "28%",
+        "fat": "15%",
+        "scene": "日常主食",
+        "proof": "Omega-3 含量 1.2%，三文鱼油 + 鱼油双来源",
+        "gift": "磨牙棒 3 支",
+        "proof_short": "Omega-3 1.2%"
+      },
+      "stock": 720,
+      "warehouse": "华南仓"
+    },
+    {
+      "id": "DG-DRY-0034",
+      "name": "小型犬鸭肉梨配方",
+      "brand": "牧野",
+      "category": "狗粮",
+      "price": 139,
+      "spec": "2kg",
+      "audience": "10kg 以下小型犬",
+      "attributes": {
+        "ingredients": [
+          "鸭肉 32%",
+          "梨干",
+          "糙米",
+          "菊苣根"
+        ],
+        "functions": [
+          "清淡泪痕",
+          "易消化",
+          "低脂"
+        ],
+        "protein": "26%",
+        "fat": "12%",
+        "scene": "泪痕困扰日常",
+        "proof": "颗粒 8mm，小型犬一口一颗不塞牙",
+        "gift": "鸭肉干 100g",
+        "proof_short": "8mm颗粒"
+      },
+      "stock": 1520,
+      "warehouse": "华南仓"
+    },
+    {
+      "id": "CF-DRY-0025",
+      "name": "老年猫低磷配方粮",
+      "brand": "牧野",
+      "category": "猫粮",
+      "price": 189,
+      "spec": "1.8kg",
+      "audience": "7岁以上老年猫",
+      "attributes": {
+        "ingredients": [
+          "鸡肉",
+          "水解蛋白",
+          "米",
+          "鱼油"
+        ],
+        "functions": [
+          "低磷护肾",
+          "易咀嚼",
+          "免疫支持"
+        ],
+        "protein": "30%",
+        "fat": "12%",
+        "scene": "老年猫长期主食",
+        "proof": "磷含量 0.6%，低于常规成猫粮 1.0% 水平",
+        "gift": "软粮试用 60g",
+        "proof_short": "磷0.6%"
+      },
+      "stock": 430,
+      "warehouse": "华北仓"
+    },
+    {
+      "id": "CF-DRY-0011",
+      "name": "多猫家庭大包装成猫粮",
+      "brand": "牧野",
+      "category": "猫粮",
+      "price": 329,
+      "spec": "12kg",
+      "audience": "3 只以上多猫家庭",
+      "attributes": {
+        "ingredients": [
+          "鸡肉 35%",
+          "玉米",
+          "豆粕",
+          "鸡脂"
+        ],
+        "functions": [
+          "高性价比",
+          "全阶段",
+          "耐储存"
+        ],
+        "protein": "30%",
+        "fat": "14%",
+        "scene": "多猫家庭月度囤货",
+        "proof": "12kg 约等于 1 只成猫 4 个月口粮，单斤成本低 32%",
+        "gift": "密封储粮桶",
+        "proof_short": "单斤省32%"
+      },
+      "stock": 260,
+      "warehouse": "华东仓"
+    },
+    {
+      "id": "CF-SND-0401",
+      "name": "豆腐混合猫砂",
+      "brand": "牧野",
+      "category": "猫砂",
+      "price": 79,
+      "spec": "2.5kg × 4 包",
+      "audience": "公寓养猫 / 怕粉尘",
+      "attributes": {
+        "ingredients": [
+          "豆腐渣",
+          "玉米淀粉",
+          "活性炭"
+        ],
+        "functions": [
+          "低粉尘",
+          "结团快",
+          "可冲厕"
+        ],
+        "protein": "-",
+        "fat": "-",
+        "scene": "室内封闭猫砂盆",
+        "proof": "粉尘率 0.3%，结团时间 3 秒",
+        "gift": "猫砂铲 × 1",
+        "proof_short": "粉尘0.3%"
+      },
+      "stock": 2100,
+      "warehouse": "华北仓"
+    },
+    {
+      "id": "CF-SNK-0505",
+      "name": "冻干鸡胸肉零食",
+      "brand": "牧野",
+      "category": "零食",
+      "price": 49,
+      "spec": "100g",
+      "audience": "全阶段猫犬",
+      "attributes": {
+        "ingredients": [
+          "鸡胸肉 100%"
+        ],
+        "functions": [
+          "单一成分",
+          "高蛋白",
+          "训练奖励"
+        ],
+        "protein": "78%",
+        "fat": "5%",
+        "scene": "训练奖励 / 拌粮增味",
+        "proof": "配料表只有鸡胸肉一项，粗蛋白 78%",
+        "gift": "无",
+        "proof_short": "蛋白78%"
+      },
+      "stock": 3200,
+      "warehouse": "华东仓"
+    }
+  ]
+}

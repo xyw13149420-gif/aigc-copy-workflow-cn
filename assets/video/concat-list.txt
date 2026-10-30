@@ -1,0 +1,3 @@
+file 'segment-01-hook.mp4'
+file 'segment-02-proof.mp4'
+file 'segment-03-cta.mp4'

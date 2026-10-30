@@ -1,0 +1,420 @@
+/* ============================================================
+   视觉皮肤层 · 弥散渐变 / 玻璃卡片
+   ------------------------------------------------------------
+   只覆盖颜色、圆角、阴影、字体气质，不动任何布局与尺寸逻辑。
+   想退回原来的纸质感，把这个文件从 build.js 的 __SKIN__ 里摘掉即可。
+   色板取自参考图：#598BFD / #9AD4CB / #35B3C9
+   ============================================================ */
+
+:root{
+  /* 底色：中性冷灰，不再是暖米色 */
+  --paper:#EEF2F8;
+  --paper-2:#F5F8FD;
+  --sheet:#FFFFFF;
+  --ink:#0E1420;
+  --ink-2:#46536A;
+  --ink-3:#7C8AA0;
+  --line:#E2E8F1;
+  --line-2:#CBD6E6;
+
+  /* 主色：蓝 → 青 */
+  --accent:#598BFD;
+  --accent-2:#35B3C9;
+  --accent-3:#9AD4CB;
+  --accent-soft:#EAF1FE;
+  --green:#2E9E92;
+  --green-soft:#E1F4F1;
+  --amber:#C08327;
+  --amber-soft:#FBF1DC;
+
+  /* 渐变与玻璃 */
+  --grad:linear-gradient(118deg,#598BFD 0%,#5FA6F4 44%,#35B3C9 100%);
+  --grad-soft:linear-gradient(135deg,rgba(89,139,253,.16),rgba(154,212,203,.18));
+  --glass:rgba(255,255,255,.62);
+  --glass-line:rgba(255,255,255,.82);
+
+  --r:14px;
+  --r-lg:22px;
+  --shadow-sm:0 1px 2px rgba(16,24,40,.04);
+  --shadow-md:0 0 0 1px rgba(255,255,255,.5),0 2px 8px rgba(16,24,40,.05),0 28px 64px -34px rgba(46,84,158,.38);
+}
+
+/* ---------- 画布：四角弥散光斑 ---------- */
+body{
+  background-color:#D5E2F6;
+  /* 半径用百分比而非固定 px：光斑随视口缩放，窄屏不会被动放大成一片深色 */
+  background-image:
+    radial-gradient(112% 96% at 2% -18%,rgba(72,126,247,.52),transparent 70%),
+    radial-gradient(106% 92% at 100% -16%,rgba(38,170,196,.46),transparent 72%),
+    radial-gradient(98% 88% at 86% 42%,rgba(118,204,198,.48),transparent 70%),
+    radial-gradient(94% 86% at -4% 76%,rgba(84,140,244,.32),transparent 72%),
+    linear-gradient(180deg,#E9F2FF 0%,#D6E3F6 44%,#E4F0FA 100%);
+  background-attachment:fixed;
+}
+/* 噪点压到几乎看不见，只留一层胶片颗粒 */
+body::after{opacity:.022}
+::selection{background-color:rgba(89,139,253,.2);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* ---------- 顶栏：磨砂玻璃 ---------- */
+.topbar{
+  background-color:rgba(240,246,253,.16);
+  backdrop-filter:blur(18px) saturate(1.35);
+  -webkit-backdrop-filter:blur(18px) saturate(1.35);
+  border-bottom:1px solid rgba(255,255,255,.34);
+}
+.brand-mark{
+  background-image:var(--grad);color:#fff;border-radius:8px;
+  box-shadow:0 6px 14px -8px rgba(89,139,253,.9),inset 0 1px 0 rgba(255,255,255,.45);
+  font-family:var(--sans);font-weight:600;
+}
+/* 顶栏几乎全透，文字不能再用浅灰，否则压在浓背景上会虚 */
+.topbar .brand{color:rgba(10,18,32,.94)}
+.topbar .brand span:last-child{letter-spacing:.01em}
+.navlinks a{color:rgba(20,32,52,.66)}
+.navlinks a:hover{color:#2F62D8}
+.navlinks a::after{background-color:var(--accent)}
+
+/* ---------- 报头 ---------- */
+/* 首屏右上的一团柔光：整页只用这一处「重」渐变，其余靠背景雾面 */
+.hero{position:relative;isolation:isolate}
+.hero::after{
+  content:"";position:absolute;z-index:-1;pointer-events:none;
+  right:0;top:-40px;width:min(52vw,560px);height:min(42vw,460px);
+  background-image:
+    radial-gradient(closest-side,rgba(96,146,252,.34),rgba(60,178,198,.18) 58%,rgba(154,212,203,0) 76%);
+  filter:blur(56px);opacity:.7;
+}
+.masthead{border-bottom-color:rgba(16,24,40,.07)}
+h1{
+  font-family:var(--sans);font-weight:800;letter-spacing:-.035em;
+  font-size:clamp(34px,4.4vw,58px);line-height:1.16;
+}
+/* 强调词走渐变字，和页面背景同一套颜色 */
+h1 em{
+  text-decoration:none;color:transparent;
+  background-image:linear-gradient(112deg,#4A78EE 0%,#598BFD 38%,#35B3C9 78%,#3FBFA6 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.lede{color:var(--ink-2)}
+.lede b{color:var(--ink);font-weight:650}
+
+/* 标签行：改成小胶囊 */
+.tagrow{gap:8px;border-top-color:rgba(16,24,40,.07)}
+.tag{
+  background-color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);
+  padding:4px 11px;border-radius:999px;color:var(--ink-3);
+  box-shadow:0 1px 2px rgba(16,24,40,.03);
+}
+.tag+.tag::before{content:none;margin:0}
+
+/* 数据条：一块横贯的玻璃 */
+.stats{
+  background-color:var(--glass);
+  background-image:linear-gradient(112deg,rgba(89,139,253,.13),rgba(255,255,255,0) 46%,rgba(154,212,203,.18));border:1px solid var(--glass-line);border-radius:20px;
+  border-top:1px solid var(--glass-line);border-bottom:1px solid var(--glass-line);
+  backdrop-filter:blur(30px) saturate(1.9);-webkit-backdrop-filter:blur(30px) saturate(1.9);
+  box-shadow:var(--shadow-md);padding:0 6px;overflow:hidden;
+}
+.stat{border-left:1px solid rgba(16,24,40,.06)}
+.stat .n{font-family:var(--sans);font-weight:750;letter-spacing:-.03em;color:#16243C}
+.stat .k{color:var(--ink-3)}
+
+/* ---------- 参数面板 ---------- */
+.panel{
+  background-color:var(--glass);border:1px solid var(--glass-line);
+  backdrop-filter:blur(34px) saturate(1.9);-webkit-backdrop-filter:blur(34px) saturate(1.9);
+  box-shadow:var(--shadow-md),inset 0 1px 0 rgba(255,255,255,.7);
+}
+.panel::before{
+  left:22px;width:44px;height:3px;background-image:var(--grad);border-radius:0 0 3px 3px;
+  box-shadow:0 2px 10px -2px rgba(89,139,253,.8);
+}
+.panel h2{border-bottom-color:rgba(16,24,40,.07)}
+
+input,select{
+  background-color:rgba(255,255,255,.68);border-color:rgba(16,24,40,.10);border-radius:11px;
+  transition:border-color .16s,box-shadow .16s,background .16s;
+}
+input:hover,select:hover{border-color:rgba(89,139,253,.4)}
+input:focus,select:focus{
+  border-color:var(--accent);background-color:#fff;
+  box-shadow:0 0 0 4px rgba(89,139,253,.14);
+}
+input::placeholder{color:#A6B2C6}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1.2 4.9 5 8.8 1.2' fill='none' stroke='%237C8AA0' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:10px 7px;
+}
+
+/* 按钮 */
+.btn{
+  border-radius:11px;background-color:rgba(255,255,255,.8);border-color:rgba(16,24,40,.1);
+  transition:.18s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{
+  background-image:var(--grad);border:none;color:#fff;font-weight:550;
+  box-shadow:0 12px 26px -14px rgba(69,124,240,.85),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.btn.primary:hover{filter:brightness(1.05);box-shadow:0 16px 32px -14px rgba(69,124,240,.95)}
+.btn.ghost{background-color:rgba(255,255,255,.55)}
+.btn.ghost:hover{background-color:#fff}
+
+/* 识别结果小条 */
+.adapt{
+  background-image:var(--grad-soft);border:1px solid rgba(89,139,253,.16);border-radius:10px;
+  color:var(--ink-2);
+}
+.adapt b{color:#3D6BDB}
+.adapt i{color:var(--ink-3)}
+.adapt.warn{background-image:linear-gradient(135deg,rgba(192,131,39,.1),rgba(192,131,39,.04));border-color:rgba(192,131,39,.22)}
+.adapt.warn b{color:var(--amber)}
+
+/* ---------- 变量条 / chip ---------- */
+.ctxbar{
+  background-color:var(--glass);border-color:var(--glass-line);border-radius:var(--r-lg);
+  backdrop-filter:blur(28px) saturate(1.8);-webkit-backdrop-filter:blur(28px) saturate(1.8);
+  box-shadow:var(--shadow-sm);
+}
+.chip{
+  background-color:rgba(255,255,255,.85);border-color:rgba(16,24,40,.08);border-radius:999px;
+  padding:4px 11px;color:var(--ink-2);
+}
+.chip b{color:var(--ink)}
+.chip.acc{background-color:rgba(89,139,253,.1);border-color:rgba(89,139,253,.24);color:#3A66D6}
+.chip.acc b{color:#2F57BE}
+.chip.grn{background-color:rgba(53,179,201,.1);border-color:rgba(53,179,201,.24);color:#1F8698}
+.chip.grn b{color:#177182}
+
+/* ---------- 章节标题 ---------- */
+.block-hd{border-bottom-color:rgba(16,24,40,.08)}
+.block-hd h3{letter-spacing:-.012em}
+.block-hd .idx{
+  background-image:var(--grad);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;font-weight:700;
+}
+
+/* ---------- 标题列表 ---------- */
+.titem{
+  background-color:var(--glass);border-color:rgba(255,255,255,.9);
+  backdrop-filter:blur(20px) saturate(1.7);-webkit-backdrop-filter:blur(20px) saturate(1.7);
+  box-shadow:0 1px 2px rgba(16,24,40,.03);
+}
+.titem:hover{
+  border-color:rgba(89,139,253,.35);background-color:#fff;
+  box-shadow:0 12px 30px -20px rgba(56,92,166,.5);
+}
+.titem .no{color:#B4C0D4}
+.titem .badge{background-color:rgba(53,179,201,.12);color:#1F8698;border-radius:999px}
+.titem .badge.warn{background-color:rgba(192,131,39,.12);color:var(--amber)}
+.titem .tpl{color:#9AA8BE}
+
+/* ---------- 卖点卡 ---------- */
+/* 卡片抬高白度：原来是 .62 的半透明白，压在深一点的蓝底上会泛出一层蓝灰，
+   和页面糊成一片，里面 10px 的小字就跟着一起沉下去。
+   只作用在 .splist 的直接子元素上 —— 提示词面板头部也用 .sp 当工具条容器。 */
+.splist > .sp{
+  background-color:rgba(255,255,255,.84);border-color:rgba(255,255,255,.95);
+  backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35);
+  box-shadow:0 0 0 1px rgba(255,255,255,.5),0 2px 10px rgba(16,24,40,.05),0 20px 44px -34px rgba(46,84,158,.42);
+}
+.splist > .sp:hover{border-color:rgba(89,139,253,.34);box-shadow:0 0 0 1px rgba(255,255,255,.6),0 16px 38px -26px rgba(46,84,158,.6)}
+
+/* 品类小标签：原来是 11px 的 #5C7BC4 裸字，压在淡蓝卡上等于没写。改成实心感的小胶囊 */
+.sp-cat{
+  align-self:flex-start;margin-top:2px;
+  font-size:10.5px;font-weight:600;letter-spacing:.06em;
+  color:#2B5BC4;background-color:rgba(89,139,253,.13);
+  border:1px solid rgba(89,139,253,.24);border-radius:999px;padding:2px 9px;
+}
+
+/* 三段式：色块上的字必须是白的、够重的，底色也要分出先后（痛点暖 → 证据蓝 → 结果青） */
+.seg{background-color:transparent;font-size:12px;gap:7px}
+.seg .lb{
+  color:#fff;font-size:10px;font-weight:600;letter-spacing:.06em;
+  padding:2.5px 7px;border-radius:5px;
+}
+.seg.k1 .lb{background-color:#A8482F}
+.seg.k2 .lb{background-color:#3F66C9}
+.seg.k3 .lb{background-color:#1B6E5C}
+.seg.k4 .lb{background-color:#3D4E6B}
+.seg .vl{color:#25324A}
+.arrow{color:#7A8BA3}
+/* 窄屏上一行只放得下一个色块，箭头会吊在行尾变成孤零零一个 →；
+   三个色块本身都带名字，去掉箭头、改成竖排三段更清楚 */
+@media (max-width:560px){
+  .sp-flow{flex-direction:column;align-items:flex-start;gap:7px}
+  .sp-flow .arrow{display:none}
+  .sp-flow .seg{max-width:100%}
+}
+
+/* 提示词面板头部的 .sp 只是「复制中英两段」的工具条容器，不该继承卖点卡的内外框：
+   原来它带着 #fff 底 + 16px 内边距，看着像按钮外面又套了个白盒子。 */
+.pd-gh .sp{background-color:transparent;border:0;box-shadow:none;padding:0;border-radius:0}
+
+/* ---------- 客服话术 ---------- */
+.cs-tag{border-radius:999px;background-color:rgba(89,139,253,.12);color:#3A66D6;border:none}
+.cs-bubble{
+  background-color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);
+  border-radius:4px 16px 16px 16px;box-shadow:0 1px 2px rgba(16,24,40,.03);
+}
+
+/* ---------- 分镜卡 ---------- */
+.frame{
+  background-color:var(--glass);border-color:rgba(255,255,255,.9);border-radius:18px;
+  backdrop-filter:blur(20px) saturate(1.7);-webkit-backdrop-filter:blur(20px) saturate(1.7);
+  box-shadow:0 2px 6px rgba(16,24,40,.04);
+}
+.frame:hover{border-color:rgba(89,139,253,.3);box-shadow:0 16px 36px -26px rgba(56,92,166,.6)}
+.frame.on{border-color:rgba(89,139,253,.55);box-shadow:0 0 0 3px rgba(89,139,253,.12),0 18px 40px -28px rgba(56,92,166,.6)}
+.shot{background-color:#E8EEF7}
+.shot .tag{background-color:rgba(12,18,30,.6);backdrop-filter:blur(8px);border-radius:999px}
+.shot .tag.ai{background-color:rgba(53,179,201,.86)}
+.shot .tools button{border-radius:9px;background-color:rgba(255,255,255,.86);backdrop-filter:blur(10px)}
+.shot .tools button:hover{background-color:#fff;color:var(--accent)}
+.shot.blank{background-image:linear-gradient(160deg,rgba(89,139,253,.09),rgba(154,212,203,.12))}
+.shot.blank .ph-t{color:#3A66D6}
+.pbtn{
+  border-radius:999px;background-color:rgba(255,255,255,.8);border-color:rgba(16,24,40,.09);
+  transition:.16s;
+}
+.pbtn:hover{border-color:var(--accent);color:var(--accent);background-color:rgba(89,139,253,.07)}
+.pbtn.on{
+  background-image:var(--grad);color:#fff;border-color:transparent;
+  box-shadow:0 8px 18px -12px rgba(69,124,240,.9);
+}
+.pbtn.on:hover{filter:brightness(1.05);color:#fff;background-image:var(--grad)}
+
+/* 提示词面板 */
+.pdetail{
+  background-color:var(--glass);border-color:var(--glass-line);border-radius:18px;
+  backdrop-filter:blur(28px) saturate(1.8);-webkit-backdrop-filter:blur(28px) saturate(1.8);
+  box-shadow:var(--shadow-md);
+}
+.pd-t{
+  background-image:var(--grad);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;font-weight:700;
+}
+.pd-group{background-color:rgba(255,255,255,.6);border-radius:14px}
+.pd-group.hl{background-color:rgba(89,139,253,.07);box-shadow:inset 0 0 0 1px rgba(89,139,253,.18)}
+.pd-lb button{border-radius:999px}
+.pdetail pre{
+  background-color:rgba(255,255,255,.85);border:1px solid rgba(16,24,40,.07);border-radius:12px;
+  color:var(--ink-2);
+}
+.minibtn{border-radius:999px;background-color:rgba(255,255,255,.8)}
+.minibtn.solid{background-image:var(--grad);border:none;color:#fff}
+.minibtn.solid:hover{background-image:var(--grad);filter:brightness(1.06)}
+
+/* 说明条 */
+.boardtip{
+  background-color:rgba(255,255,255,.6);border:1px dashed rgba(89,139,253,.34);border-radius:12px;
+  color:var(--ink-3);
+}
+.boardtip kbd{background-color:rgba(89,139,253,.12);border-radius:5px;color:#3A66D6}
+
+/* ---------- 口播脚本 / 成片 ---------- */
+.video{border-color:rgba(255,255,255,.9);background-color:var(--glass);border-radius:18px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.vseg{border-bottom-color:rgba(16,24,40,.06)}
+.vtime{border-right-color:rgba(16,24,40,.06)}
+.vseg.on{background-color:rgba(89,139,253,.08)}
+.vseg.on .vtime .r{color:var(--accent)}
+.vline{border-left-color:rgba(89,139,253,.28)}
+.filmplate{
+  background-color:var(--glass);border-color:var(--glass-line);border-radius:22px;
+  backdrop-filter:blur(28px) saturate(1.8);-webkit-backdrop-filter:blur(28px) saturate(1.8);
+  box-shadow:var(--shadow-md);
+}
+.film{border-radius:16px;overflow:hidden;background-color:#0B1220}
+.rehearse{border-radius:14px;overflow:hidden}
+/* rplay 是铺满整幅的点击遮罩，不是按钮本身：只能给它压暗，不能上渐变 */
+.rehearse .rbar span{color:rgba(255,255,255,.85)}
+.rehearse .rplay{background-color:rgba(10,18,32,.14)}
+.rehearse .rplay:hover{background-color:rgba(10,18,32,.24)}
+.rehearse .rplay em{background-color:#fff;color:var(--ink);box-shadow:0 10px 26px -10px rgba(8,20,40,.5)}
+.rehearse .rbar i{background-image:var(--grad)}
+.filmempty{
+  border:1.5px dashed rgba(89,139,253,.32);border-radius:16px;background-color:rgba(255,255,255,.58);
+  background-image:repeating-linear-gradient(135deg,rgba(89,139,253,.07) 0 6px,transparent 6px 13px);
+}
+.filmempty .ft{color:#3A66D6}
+.filmtools .minibtn{background-color:rgba(255,255,255,.85)}
+
+/* ---------- 合规 ---------- */
+.comp{
+  background-color:var(--glass);border-color:rgba(255,255,255,.9);border-radius:var(--r-lg);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm);
+}
+.comp-status.ok{color:var(--ink)}
+.comp-status.ok .ic{background-color:var(--green);box-shadow:0 6px 14px -8px rgba(46,158,146,.9)}
+.comp-status.bad .ic{background-color:#D0553F}
+.comp-grid{background-color:rgba(255,255,255,.55);border-radius:14px;overflow:hidden}
+.comp-grid div{border-color:rgba(16,24,40,.06)}
+.comp-grid div:first-child{background-color:rgba(89,139,253,.06)}
+.comp-hits li{border-color:rgba(16,24,40,.06)}
+.comp-hits code{background-color:rgba(192,131,39,.12);color:var(--amber);border-radius:6px}
+.comp-rules li{color:var(--ink-2)}
+.allowrow{border-radius:10px;background-color:rgba(255,255,255,.5)}
+
+/* ---------- 效率 ---------- */
+.bench{
+  background-color:var(--glass);border-color:rgba(255,255,255,.9);border-radius:var(--r-lg);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm);
+}
+.brow+.brow{border-top-color:rgba(16,24,40,.06)}
+.bar{background-color:rgba(16,24,40,.06);border-radius:999px}
+.bar .fill{background-image:linear-gradient(90deg,#598BFD,#7FA8FB);border-radius:999px}
+.bar.m .fill{background-image:linear-gradient(90deg,#35B3C9,#5FC8D6)}
+.bar.c .fill{background-image:linear-gradient(90deg,#9AD4CB,#6FC3B6)}
+.legend i{border-radius:999px}
+.bench-total{border-radius:14px;background-color:rgba(89,139,253,.07)}
+
+/* ---------- 表格 ---------- */
+.tablewrap{
+  background-color:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r-lg);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm);
+}
+th{color:var(--ink-3)}
+th,td{border-color:rgba(16,24,40,.07)}
+tbody tr:hover td{background-color:rgba(89,139,253,.05)}
+td.pos{color:#C0442E}
+td.neg{color:var(--green)}
+
+/* ---------- 方法卡 ---------- */
+.card{
+  background-color:var(--glass);border-color:rgba(255,255,255,.9);border-radius:var(--r-lg);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 1px 2px rgba(16,24,40,.03);
+}
+.card:hover{border-color:rgba(89,139,253,.3);box-shadow:0 20px 44px -32px rgba(56,92,166,.6)}
+.card .num{
+  background-image:var(--grad);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;font-weight:800;
+}
+.card code{background-color:rgba(89,139,253,.09);color:#3A66D6;border-radius:6px}
+
+/* ---------- 页脚 / 状态条 ---------- */
+footer{border-top-color:rgba(16,24,40,.08);color:var(--ink-3)}
+footer code{background-color:rgba(89,139,253,.09);color:#3A66D6;border-radius:6px}
+.apibar{border-color:rgba(16,24,40,.07)}
+.apibar .dot{background-color:var(--accent-2);box-shadow:0 0 0 3px rgba(53,179,201,.16)}
+.apibar .dot.off{background-color:#A9B5C7;box-shadow:none}
+.apibar b{color:var(--ink-2)}
+.notice{background-color:rgba(89,139,253,.07);border:1px solid rgba(89,139,253,.2);border-radius:12px;color:var(--ink-2)}
+.prodmeta b{color:var(--ink)}
+.prodmeta .sep{color:var(--line-2)}
+
+/* 记录 */
+.hist{background-color:var(--glass);border:1px solid var(--glass-line);border-radius:18px;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm)}
+.hrow{border-color:rgba(16,24,40,.06)}
+.hrow.cur{background-color:rgba(89,139,253,.07)}
+.hrow .acts a,.hrow .acts button{border-radius:999px}
+.hrow .acts a:hover,.hrow .acts button:hover{color:var(--accent);border-color:rgba(89,139,253,.4)}
+.hrow .hid{color:#A6B2C6}
+
+/* 生成中的转圈用主色 */
+.btn.primary.busy::after{border-color:rgba(255,255,255,.4);border-top-color:#fff}

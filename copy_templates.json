@@ -1,0 +1,1707 @@
+{
+  "meta": {
+    "name": "天猫/淘宝 宠物主粮文案模板库",
+    "version": "1.0.0",
+    "goal": "单篇文案产出 5 分钟 -> 3 分钟（输入 15s + 生成 3s + 审校 2min）",
+    "division_of_labor": {
+      "templates": "管结构与合规：标题骨架、卖点四段结构、话术场景分类、口播分镜、极限词黑名单与替换映射",
+      "script": "管变量注入与组合去重：占位符填充、30 字校验、超长回退短模板、批次去重、合规扫描替换、耗时测算"
+    },
+    "placeholder_help": {
+      "brand": "品牌名，来自 variable_pools.brand",
+      "product": "商品名，由 --product 传入",
+      "spec": "规格，由 --spec 传入",
+      "price": "到手价，由 --price 传入",
+      "audience": "人群，由 --audience 传入",
+      "核心成分": "成分/原料证据，来自 variable_pools.ingredient",
+      "功能": "可感知功效方向，来自 variable_pools.function",
+      "人群": "短人群词，脚本按 audience 关键词推导",
+      "场景": "使用场景，来自 variable_pools.scene",
+      "数字卖点": "可量化卖点，来自 variable_pools.number_proof",
+      "赠品": "赠品，来自 variable_pools.gift"
+    },
+    "disclaimer": "样例中的克重、蛋白含量、检测项数等数字为演示占位，正式投放前必须替换为实测值/检测报告数值。"
+  },
+  "sections": {
+    "title_templates": [
+      {
+        "id": "T01",
+        "pattern": "{brand}{product}{spec} {核心成分} {功能}",
+        "price_band": "all",
+        "tier": "long",
+        "max_chars": 30,
+        "note": "品牌+品名+规格+成分，主图搜索词齐全"
+      },
+      {
+        "id": "T02",
+        "pattern": "【{brand}】{product} {spec} {数字卖点} {核心成分}",
+        "price_band": "all",
+        "tier": "long",
+        "max_chars": 30,
+        "note": "品牌前置加方括号，强化识别"
+      },
+      {
+        "id": "T03",
+        "pattern": "{product}{spec} {核心成分} 适合{人群}",
+        "price_band": "100-199",
+        "tier": "long",
+        "max_chars": 30,
+        "note": "中价带用人群适配打消顾虑"
+      },
+      {
+        "id": "T04",
+        "pattern": "{brand}{product} {功能} {数字卖点} {spec}",
+        "price_band": "all",
+        "tier": "long",
+        "max_chars": 30,
+        "note": "功能+数字卖点前置做差异"
+      },
+      {
+        "id": "T05",
+        "pattern": "{product} {spec} {人群}推荐 {核心成分}",
+        "price_band": "all",
+        "tier": "mid",
+        "max_chars": 30,
+        "note": "人群推荐词，适合细分款"
+      },
+      {
+        "id": "T06",
+        "pattern": "{核心成分}{product} {spec} {功能}",
+        "price_band": "0-99",
+        "tier": "mid",
+        "max_chars": 30,
+        "note": "低价带用成分打头，弱化品牌"
+      },
+      {
+        "id": "T07",
+        "pattern": "{brand}{product}{spec} {场景}常备",
+        "price_band": "all",
+        "tier": "mid",
+        "max_chars": 30,
+        "note": "场景词触发囤货需求"
+      },
+      {
+        "id": "T08",
+        "pattern": "{product} {spec} {数字卖点}",
+        "price_band": "all",
+        "tier": "short",
+        "max_chars": 30,
+        "note": "短模板：超长回退首选"
+      },
+      {
+        "id": "T09",
+        "pattern": "{brand}{product} {spec}",
+        "price_band": "all",
+        "tier": "short",
+        "max_chars": 30,
+        "note": "短模板：极简主图款"
+      },
+      {
+        "id": "T10",
+        "pattern": "{product} {功能} {spec}",
+        "price_band": "all",
+        "tier": "short",
+        "max_chars": 30,
+        "note": "短模板：功能+规格"
+      },
+      {
+        "id": "T11",
+        "pattern": "{场景}囤货 {product} {spec}",
+        "price_band": "all",
+        "tier": "short",
+        "max_chars": 30,
+        "note": "短模板：场景囤货"
+      },
+      {
+        "id": "T12",
+        "pattern": "{brand}{product} {核心成分} {spec}",
+        "price_band": "100-199",
+        "tier": "mid",
+        "max_chars": 30,
+        "note": "中价带成分背书"
+      },
+      {
+        "id": "T13",
+        "pattern": "{product}{spec} 送{赠品}",
+        "price_band": "all",
+        "tier": "short",
+        "max_chars": 30,
+        "note": "短模板：赠品钩子"
+      },
+      {
+        "id": "T14",
+        "pattern": "{人群}怎么选 {product} {spec} {数字卖点}",
+        "price_band": "200-999",
+        "tier": "long",
+        "max_chars": 30,
+        "note": "高价带用选购攻略式标题"
+      }
+    ],
+    "selling_points": [
+      {
+        "id": "S01",
+        "category": "成分",
+        "pain": "换粮就软便",
+        "evidence": "0 谷物 + 鲜鸡肉单一动物蛋白",
+        "result": "便便成型好清理",
+        "number": "7天过渡表",
+        "template": "怕{pain}？{evidence}，{result}，随箱附{number}。"
+      },
+      {
+        "id": "S02",
+        "category": "适口性",
+        "pain": "挑食闻两下就走",
+        "evidence": "颗粒表面喷涂鲜肉浆",
+        "result": "开袋就有肉香",
+        "number": "试吃装 50g",
+        "template": "{pain}的话看这条：{evidence}，{result}，先拿{number}试吃。"
+      },
+      {
+        "id": "S03",
+        "category": "毛发",
+        "pain": "换季掉毛成团",
+        "evidence": "卵磷脂 + 深海鱼油复配",
+        "result": "毛顺滑、梳子好过",
+        "number": "Omega-3 1.2%",
+        "template": "解决{pain}：{evidence}，{result}（{number}）。"
+      },
+      {
+        "id": "S04",
+        "category": "泌尿",
+        "pain": "喝水少尿量少",
+        "evidence": "低镁配方 + 冻干汤汁颗粒",
+        "result": "主动去水碗",
+        "number": "镁 0.09%",
+        "template": "怕{pain}？{evidence}，{result}，检测值{number}。"
+      },
+      {
+        "id": "S05",
+        "category": "适老",
+        "pain": "老年猫嚼不动",
+        "evidence": "6mm 小颗粒，温水可泡软",
+        "result": "碗底吃得干净",
+        "number": "温水 3 分钟",
+        "template": "{pain}：{evidence}，{result}，{number}即可。"
+      },
+      {
+        "id": "S06",
+        "category": "体态",
+        "pain": "绝育后体重上来了",
+        "evidence": "低脂高蛋白配比",
+        "result": "体重曲线稳住",
+        "number": "脂肪 12%",
+        "template": "{pain}？{evidence}，{result}，粗脂肪{number}。"
+      },
+      {
+        "id": "S07",
+        "category": "肠道",
+        "pain": "换季软便反复",
+        "evidence": "益生菌 + 益生元双组合",
+        "result": "粪便评分稳定",
+        "number": "每公斤 20 亿 CFU",
+        "template": "解决{pain}：{evidence}，{result}，{number}。"
+      },
+      {
+        "id": "S08",
+        "category": "工艺",
+        "pain": "高温膨化营养流失",
+        "evidence": "低温烘焙 90 分钟慢烤",
+        "result": "肉香锁得住",
+        "number": "水分 ≤10%",
+        "template": "怕{pain}？{evidence}，{result}，成品{number}。"
+      },
+      {
+        "id": "S09",
+        "category": "信任",
+        "pain": "不敢买没听过的牌子",
+        "evidence": "每批次检测报告可扫码查",
+        "result": "配料与报告对得上",
+        "number": "32项检测",
+        "template": "{pain}：{evidence}，{result}，共{number}。"
+      },
+      {
+        "id": "S10",
+        "category": "包装",
+        "pain": "大袋开袋受潮",
+        "evidence": "四层铝箔 + 自封条",
+        "result": "一个月不返潮",
+        "number": "500g 独立小袋",
+        "template": "{pain}？{evidence}，{result}，{number}分装。"
+      },
+      {
+        "id": "S11",
+        "category": "服务",
+        "pain": "买错整袋浪费",
+        "evidence": "随箱试吃装 + 7 天无理由",
+        "result": "不合适可退",
+        "number": "试吃装 50g",
+        "template": "担心{pain}？{evidence}，{result}，先试{number}。"
+      },
+      {
+        "id": "S12",
+        "category": "性价比",
+        "pain": "囤货单价越买越贵",
+        "evidence": "大规格折算每克更低",
+        "result": "每天喂养成本可控",
+        "number": "每天约 2.6 元",
+        "template": "{pain}？{evidence}，{result}，{number}。"
+      }
+    ],
+    "cs_scripts": [
+      {
+        "id": "C01",
+        "scene": "售前",
+        "template": "在的～这款{product}是{spec}装，主打{核心成分}，{人群}用着合适，需要我按体重帮您算每天喂多少吗？",
+        "max_chars": 80,
+        "note": "先答再问，落到具体动作",
+        "template_no_gift": "在的～这款{product}是{spec}装，主打{核心成分}，{人群}用着合适，需要我按体重帮您算每天喂多少吗？",
+        "kinds": [
+          "dry",
+          "wet"
+        ]
+      },
+      {
+        "id": "C02",
+        "scene": "售前",
+        "template": "{product}和同类款的差别主要在{核心成分}；要是平时挑食，建议先拍试吃装，不合适 7 天可退。",
+        "max_chars": 80,
+        "note": "不比较友商，只讲自身证据",
+        "kinds": [
+          "dry",
+          "wet",
+          "treat"
+        ]
+      },
+      {
+        "id": "C03",
+        "scene": "物流",
+        "template": "已帮您查到，包裹今天从{仓}发出，预计{天数}天到，单号{运单号}，物流一动我第一时间同步给您。",
+        "max_chars": 80,
+        "note": "给确定性，不给空承诺"
+      },
+      {
+        "id": "C04",
+        "scene": "物流",
+        "template": "亲，{城市}这两天暴雨可能慢 1 天，我已备注加急，真超时了运费险我们先走赔付，不用您催。",
+        "max_chars": 80,
+        "note": "异常前置告知 + 兜底方案"
+      },
+      {
+        "id": "C05",
+        "scene": "售后",
+        "template": "收到啦，先别急～把外包装和{物种}状态拍给我，我按「{售后政策}」给您处理，能补发就先补发。",
+        "max_chars": 80,
+        "note": "先安抚再取证，避免拉扯"
+      },
+      {
+        "id": "C06",
+        "scene": "售后",
+        "template": "软便多半是换粮太快，建议 7 天过渡：前 3 天新粮占四分之一，需要我把过渡表发您吗？",
+        "max_chars": 80,
+        "note": "把售后转成使用方法指导",
+        "kinds": [
+          "dry",
+          "wet"
+        ]
+      },
+      {
+        "id": "C07",
+        "scene": "催付",
+        "template": "您购物车的{product}还有{库存}件，现在下单送{赠品}，活动今晚 24 点结束，我先帮您锁一单？",
+        "max_chars": 80,
+        "note": "稀缺 + 临期，给锁单动作",
+        "template_no_gift": "您购物车的{product}还有{库存}件，活动今晚 24 点结束，我先帮您锁一单？"
+      },
+      {
+        "id": "C08",
+        "scene": "催付",
+        "template": "亲，订单还差最后一步支付，{price} 元，还送{赠品}，付完 48 小时内发出，地址要改现在说也行。",
+        "max_chars": 80,
+        "note": "把支付门槛降到最低",
+        "template_no_gift": "亲，订单还差最后一步支付，{price} 元，付完 48 小时内发出，地址要改现在说也行。"
+      },
+      {
+        "id": "C09",
+        "scene": "售后",
+        "kinds": [
+          "litter"
+        ],
+        "template": "结团粘底多半是铺太薄，铺到 5cm 以上会好很多，需要我按盆的尺寸帮您算用量吗？"
+      },
+      {
+        "id": "C10",
+        "scene": "售后",
+        "kinds": [
+          "treat"
+        ],
+        "template": "吃太快噎着的话，把{形态}掰小块，或者泡软 1 分钟再给，训练时一次别超过两颗。"
+      },
+      {
+        "id": "C11",
+        "scene": "售前",
+        "kinds": [
+          "litter"
+        ],
+        "template": "这款{product}是{spec}，{核心成分}做基底，{人群}用着省心，需要我按盆数算一个月要几包吗？"
+      },
+      {
+        "id": "C12",
+        "scene": "售前",
+        "kinds": [
+          "treat"
+        ],
+        "template": "这款{product}是{spec}，配料就是{核心成分}；训练时一次给一两块，需要我按体重帮您算一天的喂食上限吗？"
+      }
+    ],
+    "video_script": {
+      "id": "V01",
+      "total_seconds": 25,
+      "ratio": "9:16",
+      "structure": "0-3s 钩子 / 3-15s 卖点证明 / 15-25s 促单",
+      "segments": [
+        {
+          "range": "0-3s",
+          "stage": "钩子",
+          "visual": [
+            "手撕开袋口特写，{形态}倒进玻璃碗",
+            "镜头怼近{形态}，字幕打在{形态}上方"
+          ],
+          "line": "别急着下单，先看这{量词}{product}的配料表开头写了什么。",
+          "subtitle": "配料表开头，才是成本大头"
+        },
+        {
+          "range": "3-15s",
+          "stage": "卖点证明",
+          "visual": [
+            "掰开一颗{形态}看横切面",
+            "温水泡 3 分钟后用手指压碎",
+            "{物种}低头吃的正拍"
+          ],
+          "line": "{核心成分}，{数字卖点}，{功能}；温水泡 3 分钟能压碎，{物种}换粮不闹肚子。",
+          "subtitle": "成分看得见 · 泡得开 · 吃得完"
+        },
+        {
+          "range": "15-25s",
+          "stage": "促单",
+          "visual": [
+            "价格贴纸弹出",
+            "手指点购物车",
+            "赠品并列摆放"
+          ],
+          "line": "{spec} 到手 {price} 元，还送{赠品}，今天下单 48 小时内发出。",
+          "line_no_gift": "{spec} 到手 {price} 元，今天下单 48 小时内发出。",
+          "subtitle": "到手价 {price} 元 · 送{赠品}",
+          "subtitle_no_gift": "到手价 {price} 元 · 48h 内发出"
+        }
+      ],
+      "variants": {
+        "wet": {
+          "segments": [
+            {
+              "range": "0-3s",
+              "stage": "钩子",
+              "visual": [
+                "拉开拉环，{形态}整个倒扣进碗",
+                "勺背压一下，看{形态}挂不挂勺"
+              ],
+              "line": "别急着下单，先看这{量词}{product}开罐能倒出多少肉。",
+              "subtitle": "罐里有多少肉，晃一下就知道"
+            },
+            {
+              "range": "3-15s",
+              "stage": "卖点证明",
+              "visual": [
+                "勺子挑起{形态}拉丝特写",
+                "汤汁沿碗壁晃一圈",
+                "{物种}低头舔汤的正拍"
+              ],
+              "line": "{核心成分}，{数字卖点}，{功能}；倒出来是看得见的{形态}，不是糊。",
+              "subtitle": "看得见肉 · 汤汁挂壁"
+            },
+            {
+              "range": "15-25s",
+              "stage": "促单",
+              "visual": [
+                "价格贴纸弹出",
+                "手指点购物车",
+                "赠品与罐体并排"
+              ],
+              "line": "{spec} 到手 {price} 元，还送{赠品}，今天下单 48 小时内发出。",
+              "line_no_gift": "{spec} 到手 {price} 元，今天下单 48 小时内发出。",
+              "subtitle": "到手价 {price} 元 · 送{赠品}",
+              "subtitle_no_gift": "到手价 {price} 元 · 48h 内发出"
+            }
+          ]
+        },
+        "litter": {
+          "segments": [
+            {
+              "range": "0-3s",
+              "stage": "钩子",
+              "visual": [
+                "一手{形态}从高处撒进盆里，逆光拍粉尘",
+                "盆底铺平后手掌压一下"
+              ],
+              "line": "别急着下单，先看这{量词}{product}倒出来扬不扬尘。",
+              "subtitle": "扬不扬尘，倒一次就知道"
+            },
+            {
+              "range": "3-15s",
+              "stage": "卖点证明",
+              "visual": [
+                "铲子整块铲起，边缘不碎",
+                "{形态}倒进水里看散开速度",
+                "盆底刮一遍看有没有粘底"
+              ],
+              "line": "{核心成分}做基底，{数字卖点}，{功能}；铲起来整块不散，盆底不留泥。",
+              "subtitle": "不扬尘 · 整块起 · 冲得走"
+            },
+            {
+              "range": "15-25s",
+              "stage": "促单",
+              "visual": [
+                "价格贴纸弹出",
+                "手指点购物车",
+                "赠品与整包并排"
+              ],
+              "line": "{spec} 到手 {price} 元，还送{赠品}，今天下单 48 小时内发出。",
+              "line_no_gift": "{spec} 到手 {price} 元，今天下单 48 小时内发出。",
+              "subtitle": "到手价 {price} 元 · 送{赠品}",
+              "subtitle_no_gift": "到手价 {price} 元 · 48h 内发出"
+            }
+          ]
+        },
+        "treat": {
+          "segments": [
+            {
+              "range": "0-3s",
+              "stage": "钩子",
+              "visual": [
+                "两指捏住一块{形态}，对着光拍纹理",
+                "掰断时的断面特写"
+              ],
+              "line": "别急着下单，先看这{量词}{product}掰开是什么样。",
+              "subtitle": "掰开看纤维，比看配料表快"
+            },
+            {
+              "range": "3-15s",
+              "stage": "卖点证明",
+              "visual": [
+                "断面纤维拉丝特写",
+                "{形态}泡水 1 分钟后捏一下",
+                "{物种}坐等口令的正拍"
+              ],
+              "line": "{核心成分}，{数字卖点}；掰开能看到肌肉纤维，{功能}。",
+              "subtitle": "一块到底 · 掰开见纤维"
+            },
+            {
+              "range": "15-25s",
+              "stage": "促单",
+              "visual": [
+                "价格贴纸弹出",
+                "手指点购物车",
+                "赠品与整袋并排"
+              ],
+              "line": "{spec} 到手 {price} 元，还送{赠品}，今天下单 48 小时内发出。",
+              "line_no_gift": "{spec} 到手 {price} 元，今天下单 48 小时内发出。",
+              "subtitle": "到手价 {price} 元 · 送{赠品}",
+              "subtitle_no_gift": "到手价 {price} 元 · 48h 内发出"
+            }
+          ]
+        },
+        "dry|犬": {
+          "segments": [
+            {
+              "range": "0-3s",
+              "stage": "钩子",
+              "visual": [
+                "手撕开袋口特写，{形态}倒进不锈钢碗",
+                "镜头怼近{形态}，字幕打在{形态}上方"
+              ],
+              "line": "别急着下单，先看这{量词}{product}的配料表开头写了什么。",
+              "subtitle": "配料表开头，才是成本大头"
+            },
+            {
+              "range": "3-15s",
+              "stage": "卖点证明",
+              "visual": [
+                "抓一把{形态}摊在手心",
+                "两颗{形态}对着光看油膜",
+                "{物种}低头吃的正拍"
+              ],
+              "line": "{核心成分}，{数字卖点}，{功能}；{形态}干爽不挂手，{物种}换粮不闹肚子。",
+              "subtitle": "成分看得见 · 不油腻 · 吃得完"
+            },
+            {
+              "range": "15-25s",
+              "stage": "促单",
+              "visual": [
+                "价格贴纸弹出",
+                "手指点购物车",
+                "赠品并列摆放"
+              ],
+              "line": "{spec} 到手 {price} 元，还送{赠品}，今天下单 48 小时内发出。",
+              "line_no_gift": "{spec} 到手 {price} 元，今天下单 48 小时内发出。",
+              "subtitle": "到手价 {price} 元 · 送{赠品}",
+              "subtitle_no_gift": "到手价 {price} 元 · 48h 内发出"
+            }
+          ]
+        }
+      }
+    },
+    "storyboard": {
+      "note": "分镜配图就是按这三条提示词生成的：中文给国内模型（即梦/可灵/MJ 中文），英文给 Nano Banana Pro / Midjourney。改画面先改这里，别改代码。",
+      "ratio": "9:16",
+      "pixels": "1080x1920",
+      "style_zh": "电商产品摄影，自然窗光，暖中性色调，浅景深，细微胶片颗粒，真实材质不做过度磨皮",
+      "style_en": "editorial pet product photography, soft natural window light, warm neutral palette, subtle film grain, realistic textures, no over-retouching",
+      "avoid_zh": "字幕、水印、logo、可读文字、变形的手指、多余手指、塑料感、过曝、HDR",
+      "avoid_en": "text, watermark, logo, readable letters, deformed hands, extra fingers, plastic sheen, blown highlights, HDR",
+      "camera": {
+        "hook": {
+          "shot_zh": "微距特写",
+          "shot_en": "macro close-up",
+          "frame_zh": "主体占画面三分之二，边缘轻微压暗",
+          "frame_en": "subject fills two thirds of the frame, edges slightly darkened",
+          "angle_zh": "俯 15 度，镜头略高于台面",
+          "angle_en": "15 degrees down, lens just above the countertop",
+          "lens_zh": "等效 50mm，f/2.0 浅景深，焦点压在动作接触点",
+          "lens_en": "50mm equivalent, f/2.0 shallow depth of field, focus on the contact point",
+          "move_zh": "手持微推近，起幅到落幅不超过 5 厘米",
+          "move_en": "handheld slow push-in, under 5 cm from start to end",
+          "pace_zh": "0-3 秒单镜到底，不转场",
+          "pace_en": "one continuous take for 0-3 s, no cuts",
+          "light_zh": "左上侧逆光，台面留一道长影",
+          "light_en": "hard side-backlight from the upper left, one long shadow across the table",
+          "set_zh": "深胡桃木台面，背景米白墙与浅色布帘虚化",
+          "set_en": "dark walnut tabletop, blurred off-white wall and pale linen curtain behind"
+        },
+        "proof": {
+          "shot_zh": "近景",
+          "shot_en": "close-up",
+          "frame_zh": "焦点落在手上的动作，碗沿入画三分之一",
+          "frame_en": "focus on the hand action, bowl rim in the lower third",
+          "angle_zh": "俯 45 度，与台面成斜角",
+          "angle_en": "45 degrees down, angled against the countertop",
+          "lens_zh": "等效 35mm，f/2.8，景深刚好带住手和碗",
+          "lens_en": "35mm equivalent, f/2.8, depth of field holding both hand and bowl",
+          "move_zh": "固定机位，保留轻微手持呼吸感",
+          "move_en": "locked-off frame with a slight handheld breath",
+          "pace_zh": "3-15 秒走完一个动作，起止各留 0.5 秒静止",
+          "pace_en": "one action from 3 to 15 s, half a second of hold at each end",
+          "light_zh": "自然窗光从左前方铺开，高光柔和",
+          "light_en": "soft window light from the front left, gentle highlights",
+          "set_zh": "浅灰石面，一只白瓷碗，背景浅色亚麻布",
+          "set_en": "pale grey stone surface, one white ceramic bowl, light linen backdrop"
+        },
+        "cta": {
+          "shot_zh": "中景",
+          "shot_en": "medium shot",
+          "frame_zh": "产品居中偏左，右侧留 40% 空白贴价签",
+          "frame_en": "product centred and slightly left, 40 percent empty space on the right for a price sticker",
+          "angle_zh": "平视，与台面同高",
+          "angle_en": "eye level, level with the countertop",
+          "lens_zh": "等效 50mm，f/4，全画面清晰",
+          "lens_en": "50mm equivalent, f/4, everything sharp",
+          "move_zh": "固定机位，最后 1 秒轻微推近",
+          "move_en": "locked-off, a small push-in over the last second",
+          "pace_zh": "15-25 秒收尾，落幅定格 1 秒",
+          "pace_en": "15-25 s close, hold the final frame for one second",
+          "light_zh": "均匀柔光，无明显硬影",
+          "light_en": "even soft light, no hard shadows",
+          "set_zh": "浅橡木台面，背景干净米白",
+          "set_en": "light oak tabletop, clean off-white background"
+        }
+      },
+      "packshot": {
+        "note": "商品主图：一张干净的包装定妆照。商品名/规格/成分/赠品都从参数面板取，这里只写镜头语言。",
+        "size_zh": "中景，平视略低 10 度，主体占画面 60%，f/4 前后都实",
+        "size_en": "medium shot, camera 10 degrees below eye level, product fills 60 percent of the frame, f/4 with everything in focus",
+        "angle_zh": "正前方偏右 15 度，包装正面和侧面折痕同时可见",
+        "light_zh": "左前方大柔光箱铺底，右后方一盏轮廓光勾出袋身折痕",
+        "light_en": "large softbox from the front left, one rim light from the back right picking out the creases",
+        "set_zh": "浅橡木台面，背景干净米白，右侧留白贴价签",
+        "set_en": "light oak tabletop, clean off-white background, empty space on the right for a price card"
+      },
+      "kinds": {
+        "dry": {
+          "pack_en": "a matte kraft stand-up pouch of dry cat food",
+          "subject_en": "dry kibble pieces",
+          "hook_en": "a hand tearing open a matte kraft stand-up pouch, kibble pieces falling into a clear glass bowl",
+          "proof_en": "two fingers crushing one water-softened kibble piece, porous cross-section visible, white ceramic bowl behind",
+          "cta_en": "a large pouch standing upright with a small gift pouch beside it"
+        },
+        "dry|犬": {
+          "pack_en": "a matte stand-up pouch of dry dog food",
+          "subject_en": "dry kibble pieces",
+          "hook_en": "a hand tearing open a matte stand-up pouch, kibble falling into a stainless steel bowl",
+          "proof_en": "a handful of kibble cupped in an open palm, surface texture and oil sheen readable, stainless steel bowl beside",
+          "cta_en": "a large pouch standing upright next to a small gift pouch"
+        },
+        "wet": {
+          "pack_en": "a pull-tab can of wet cat food",
+          "subject_en": "wet food pate with visible meat shreds",
+          "hook_en": "a pull-tab can being opened, pate sliding out into a bowl in one piece",
+          "proof_en": "a spoon lifting wet food, meat shreds and gravy stretching and dripping",
+          "cta_en": "three cans stacked with one standing upright, a small gift sachet leaning beside them"
+        },
+        "litter": {
+          "pack_en": "a kraft bag of tofu cat litter",
+          "subject_en": "tofu cat litter pellets",
+          "hook_en": "litter pellets pouring from a kraft paper bag into a clear plastic litter tray",
+          "proof_en": "a hand squeezing one clump of litter, it holds its shape and releases clean",
+          "cta_en": "two litter bags standing side by side with a scoop leaning against them",
+          "cam": {
+            "hook": {
+              "set_zh": "浅灰瓷砖地面，一只敞口猫砂盆摆在画面下三分之一，背景干净米白",
+              "set_en": "pale grey tile floor, an open litter tray occupying the lower third, clean off-white background"
+            },
+            "proof": {
+              "set_zh": "浅灰石面，一只敞口猫砂盆，旁边立着一把砂铲",
+              "set_en": "pale grey stone surface, an open litter tray with a scoop standing beside it"
+            }
+          }
+        },
+        "treat": {
+          "pack_en": "a small kraft pouch of freeze-dried treats",
+          "subject_en": "freeze-dried treat cubes",
+          "hook_en": "freeze-dried cubes poured from a resealable pouch into a small ceramic dish",
+          "proof_en": "fingers snapping one freeze-dried cube in half, crumbly fibrous texture",
+          "cta_en": "a resealable treat pouch with a small sample bag beside it"
+        },
+        "other": {
+          "pack_en": "the product packaging",
+          "subject_en": "the product",
+          "hook_en": "hands opening the product packaging, the product revealed on a table",
+          "proof_en": "a hand holding the product close to camera, material and texture in focus",
+          "cta_en": "the product standing on a table with generous empty space on the right"
+        }
+      },
+      "ingredient_en": {
+        "鸡肉": "chicken", "鲜鸡肉": "fresh chicken", "鸡胸肉": "chicken breast",
+        "鸭肉": "duck", "牛肉": "beef", "羊肉": "lamb", "三文鱼": "salmon",
+        "金枪鱼": "tuna", "鳕鱼": "cod", "鱼肉": "white fish", "鸡蛋": "egg",
+        "羊奶": "goat milk", "燕麦": "oats", "豌豆": "peas", "南瓜": "pumpkin",
+        "红薯": "sweet potato", "蔓越莓": "cranberries", "鱼油": "fish oil",
+        "益生菌": "probiotics", "牛磺酸": "taurine", "冻干": "freeze-dried meat",
+        "豆腐": "tofu", "膨润土": "bentonite clay", "玉米": "corn", "糙米": "brown rice"
+      },
+      "species_en": { "猫": "cat", "犬": "dog", "猫犬": "pet" }
+    },
+    "compliance": {
+      "banned_terms": [
+        "最好",
+        "最佳",
+        "最强",
+        "最高端",
+        "最低价",
+        "全网第一",
+        "销量第一",
+        "史上最低",
+        "第一",
+        "国家级",
+        "世界级",
+        "顶级",
+        "极致",
+        "绝对安全",
+        "绝对",
+        "100%",
+        "纯天然",
+        "零风险",
+        "无副作用",
+        "根治",
+        "药到病除",
+        "永久",
+        "万能",
+        "包治",
+        "史无前例",
+        "独家",
+        "唯一",
+        "首个",
+        "冠军",
+        "王牌",
+        "神效",
+        "立竿见影",
+        "领先",
+        "特供",
+        "最"
+      ],
+      "allow_terms": [
+        "最近",
+        "最后",
+        "最终",
+        "第一时间"
+      ],
+      "replace_map": {
+        "最好": "更合适",
+        "最佳": "合适",
+        "最强": "表现突出",
+        "最高端": "高阶",
+        "最低价": "更划算",
+        "全网第一": "口碑靠前",
+        "销量第一": "销量靠前",
+        "史上最低": "更划算",
+        "第一": "优先",
+        "国家级": "符合国家标准",
+        "世界级": "成熟工艺",
+        "顶级": "高阶",
+        "极致": "很用心",
+        "绝对安全": "按标准生产",
+        "绝对": "基本",
+        "100%": "九成以上",
+        "纯天然": "天然原料",
+        "零风险": "风险低",
+        "无副作用": "按说明喂食更稳妥",
+        "根治": "改善",
+        "药到病除": "辅助改善",
+        "永久": "长期",
+        "万能": "多用",
+        "包治": "辅助改善",
+        "史无前例": "少见",
+        "独家": "自有",
+        "唯一": "少见",
+        "首个": "较早",
+        "冠军": "表现突出",
+        "王牌": "主推",
+        "神效": "效果明显",
+        "立竿见影": "见效需要周期",
+        "领先": "靠前",
+        "特供": "定制",
+        "最": "更"
+      },
+      "platform_extra_terms": {
+        "tmall": [
+          "全网最低",
+          "全网销量",
+          "国家级检测",
+          "秒杀最低"
+        ],
+        "jd": [
+          "销量冠军",
+          "行业第一",
+          "排名第一",
+          "比友商便宜"
+        ],
+        "amazon": [
+          "Best Seller",
+          "No.1",
+          "FDA approved",
+          "cure",
+          "guaranteed",
+          "100% natural"
+        ]
+      },
+      "platform_extra_replace": {
+        "全网最低": "价格友好",
+        "全网销量": "口碑靠前",
+        "国家级检测": "第三方检测",
+        "秒杀最低": "活动价",
+        "销量冠军": "销量靠前",
+        "行业第一": "行业靠前",
+        "排名第一": "排名靠前",
+        "比友商便宜": "成本更省",
+        "Best Seller": "Popular pick",
+        "No.1": "Top rated",
+        "FDA approved": "lab tested",
+        "cure": "support",
+        "guaranteed": "designed to",
+        "100% natural": "natural source"
+      },
+      "platform_rules": {
+        "tmall": {
+          "level": "高",
+          "focus": [
+            "极限词（最、第一、顶级）零容忍",
+            "禁止与友商比价、对比测评结论",
+            "禁止资质类绝对化表述",
+            "赠品须写清数量与规格"
+          ],
+          "advice": "用「较」「更」「优选」替代绝对化；功效写使用感受，不写治疗效果。"
+        },
+        "jd": {
+          "level": "高",
+          "focus": [
+            "禁止排行/冠军/第一类表述",
+            "不得出现友商名称或对比",
+            "价格与到手价必须一致",
+            "赠品需在标题外单独注明"
+          ],
+          "advice": "排行类改为「销量靠前」，比较类改为自身工艺/检测证据。"
+        },
+        "amazon": {
+          "level": "极高",
+          "focus": [
+            "禁止 Best Seller / #1 / No.1 claim",
+            "禁止 FDA approved、cure/treat 等医疗宣称",
+            "禁止 100%、guaranteed 类保证",
+            "禁止诱导好评与评价操控"
+          ],
+          "advice": "改用 lab tested / vet formulated / supports 等可举证表述，不写治愈。"
+        }
+      },
+      "usage": "脚本按 banned_terms + platform_extra_terms 扫描生成内容，命中即按 replace_map 替换并打印告警；replace_map 未覆盖的词回退为「（此处删去极限表述）」。"
+    },
+    "variable_pools": {
+      "brand": [
+        "喵满分",
+        "毛星球",
+        "宠率",
+        "三只猫",
+        "嗷呜研究所"
+      ],
+      "spec": [
+        "1.8kg",
+        "2.7kg",
+        "5.4kg",
+        "12kg",
+        "500g"
+      ],
+      "ingredient": [
+        "0谷物鲜鸡肉",
+        "鲜鸡肉+冻干",
+        "三文鱼+卵磷脂",
+        "鸭肉低敏",
+        "鸡肉+益生菌",
+        "深海鱼油"
+      ],
+      "function": [
+        "护肠胃",
+        "亮毛发",
+        "控体重",
+        "易吸收",
+        "适口性好",
+        "呵护泌尿"
+      ],
+      "audience": [
+        "幼猫",
+        "成猫",
+        "室内猫",
+        "多猫家庭",
+        "绝育猫",
+        "老年猫"
+      ],
+      "scene": [
+        "换粮期",
+        "换季掉毛",
+        "多猫家庭",
+        "出差囤货",
+        "新猫到家"
+      ],
+      "gift": [
+        "试吃装 50g",
+        "猫抓板",
+        "冻干小样",
+        "便携粮勺",
+        "过渡粮 100g"
+      ],
+      "number_proof": [
+        "42%蛋白",
+        "0谷物",
+        "90%动物蛋白",
+        "32项检测",
+        "7天换粮表",
+        "20亿CFU"
+      ],
+      "warehouse": [
+        "华东仓",
+        "华南仓",
+        "华中仓"
+      ],
+      "city": [
+        "杭州",
+        "成都",
+        "武汉",
+        "西安"
+      ],
+      "aftersale_policy": [
+        "7 天无理由",
+        "破损包赔",
+        "质量问题包退"
+      ],
+      "stock": [
+        "12",
+        "8",
+        "23"
+      ]
+    },
+    "selling_frames": [
+      {
+        "id": "F01",
+        "template": "{pain}？{evidence}，{result}（{number}）。",
+        "template_no_num": "{pain}？{evidence}，{result}。"
+      },
+      {
+        "id": "F02",
+        "template": "{pain}的话看这条：{evidence}，{result}，实测{number}。",
+        "template_no_num": "{pain}的话看这条：{evidence}，{result}。"
+      },
+      {
+        "id": "F03",
+        "template": "解决{pain}：{evidence}，{result}，数据是{number}。",
+        "template_no_num": "解决{pain}：{evidence}，{result}。"
+      },
+      {
+        "id": "F04",
+        "template": "{pain}？{evidence}，{result}，参数摆在这：{number}。",
+        "template_no_num": "{pain}？{evidence}，{result}。"
+      },
+      {
+        "id": "F05",
+        "template": "先说{pain}这件事——{evidence}，{result}，可查的是{number}。",
+        "template_no_num": "先说{pain}这件事——{evidence}，{result}。"
+      },
+      {
+        "id": "F06",
+        "template": "{evidence}，所以{pain}这事有解：{result}，{number}。",
+        "template_no_num": "{evidence}，所以{pain}这事有解：{result}。"
+      },
+      {
+        "id": "F07",
+        "template": "{pain}？别急着换牌子：{evidence}，{result}，{number}。",
+        "template_no_num": "{pain}？别急着换牌子：{evidence}，{result}。"
+      },
+      {
+        "id": "F08",
+        "template": "担心{pain}——{evidence}，{result}，{number} 写在参数里。",
+        "template_no_num": "担心{pain}——{evidence}，{result}。"
+      }
+    ],
+    "function_library": {
+      "高蛋白": {
+        "label": "成分",
+        "pain": "怕蛋白虚标、吃了不长肉",
+        "result": "摸得到肌肉，毛也厚"
+      },
+      "无谷低敏": {
+        "label": "成分",
+        "pain": "换粮就软便、还老舔爪子",
+        "result": "便便成型，不痒不挠"
+      },
+      "化毛": {
+        "label": "排毛",
+        "pain": "毛球吐在地毯上、老干呕",
+        "result": "毛球跟着粪便排走"
+      },
+      "排毛球": {
+        "label": "排毛",
+        "pain": "换毛季干呕、毛球堵在胃里",
+        "result": "毛球随粪便排出"
+      },
+      "易消化": {
+        "label": "肠道",
+        "pain": "吃得多拉得多、便里有残渣",
+        "result": "同样的量，便量更少"
+      },
+      "促发育": {
+        "label": "适龄",
+        "pain": "离乳期体重跟不上、骨架小",
+        "result": "骨架撑开，体重稳步往上"
+      },
+      "适口性好": {
+        "label": "适口",
+        "pain": "闻两下就走、拌了肉才吃",
+        "result": "开袋就来，碗底见光"
+      },
+      "高适口": {
+        "label": "适口",
+        "pain": "换主食就绝食、能饿一天",
+        "result": "开罐就来，不用拌罐头"
+      },
+      "控体重": {
+        "label": "体态",
+        "pain": "绝育后体重一路往上",
+        "result": "腰线回来，曲线稳住"
+      },
+      "低脂": {
+        "label": "体态",
+        "pain": "肚子垂下来、跑两步就喘",
+        "result": "跑动轻，喘得也少"
+      },
+      "补水": {
+        "label": "补水",
+        "pain": "一天喝不了几口水、尿量少",
+        "result": "汤汁能喝净，尿量上来"
+      },
+      "主食级": {
+        "label": "营养",
+        "pain": "拿零食当主食、越喂越瘦",
+        "result": "按主食标准吃，不用另补"
+      },
+      "美毛": {
+        "label": "毛发",
+        "pain": "毛打结、梳子卡在半路",
+        "result": "毛顺滑，梳子走得动"
+      },
+      "护关节": {
+        "label": "关节",
+        "pain": "上下楼犹豫、起身慢半拍",
+        "result": "起身利索，跑跳跟得上"
+      },
+      "低敏": {
+        "label": "成分",
+        "pain": "换个蛋白就挠痒、舔脚",
+        "result": "皮肤稳得住，不反复挠"
+      },
+      "清淡泪痕": {
+        "label": "眼部",
+        "pain": "眼角两道红褐色印子",
+        "result": "泪痕变淡，眼角干净"
+      },
+      "低磷护肾": {
+        "label": "内脏",
+        "pain": "体检磷偏高、喝水变多",
+        "result": "磷指标稳住，状态没垮"
+      },
+      "易咀嚼": {
+        "label": "适老",
+        "pain": "老牙咬不动硬颗粒",
+        "result": "一口一颗，不用泡软"
+      },
+      "免疫支持": {
+        "label": "体质",
+        "pain": "换季就打喷嚏、反复跑医院",
+        "result": "换季那几周稳得住"
+      },
+      "高性价比": {
+        "label": "价格",
+        "pain": "大牌买不起、便宜的又不敢买",
+        "result": "同规格算下来，每份更省"
+      },
+      "全阶段": {
+        "label": "适龄",
+        "pain": "家里年龄不齐、要囤两袋",
+        "result": "一袋吃到底，不用分批买"
+      },
+      "耐储存": {
+        "label": "包装",
+        "pain": "开封就返潮、结块",
+        "result": "一个月不返潮，口感不塌"
+      },
+      "低粉尘": {
+        "label": "使用",
+        "pain": "一倒就扬灰、鼻子里发呛",
+        "result": "倒出来不起灰，盆边干净"
+      },
+      "结团快": {
+        "label": "使用",
+        "pain": "一铲就散、盆底粘一层",
+        "result": "三秒成团，整块铲起不碎"
+      },
+      "可冲厕": {
+        "label": "清理",
+        "pain": "铲完还得拎下楼丢",
+        "result": "直接冲走，不用下楼"
+      },
+      "单一成分": {
+        "label": "成分",
+        "pain": "配料表长到不敢喂",
+        "result": "敢天天给，不用换着花样"
+      },
+      "训练奖励": {
+        "label": "训练",
+        "pain": "训练时叫不动、没动力",
+        "result": "一摇袋子就到位，指令跟得上"
+      },
+      "__fallback": {
+        "label": "综合",
+        "pain": "同类款买了不合用",
+        "result": "按真实参数挑，少走弯路"
+      },
+      "除臭": {
+        "label": "除臭",
+        "pain": "猫砂盆一开门就冲鼻子，放客厅都嫌",
+        "result": "味道压得住，盆边不呛"
+      },
+      "少带出": {
+        "label": "带出",
+        "pain": "一铲就带一地黄沙，天天扫地",
+        "result": "爪缝带得少，地板少扫一遍"
+      }
+    },
+    "kind_lexicon": {
+      "dry": {
+        "word": "主粮",
+        "unit": "袋",
+        "form": "颗粒"
+      },
+      "wet": {
+        "word": "主食罐",
+        "unit": "罐",
+        "form": "肉泥"
+      },
+      "litter": {
+        "word": "猫砂",
+        "unit": "包",
+        "form": "砂粒"
+      },
+      "treat": {
+        "word": "零食",
+        "unit": "袋",
+        "form": "冻干块"
+      },
+      "other": {
+        "word": "商品",
+        "unit": "件",
+        "form": "实物"
+      }
+    },
+    "species_lexicon": {
+      "猫": {
+        "word": "猫咪",
+        "owner": "猫主人",
+        "stage": "幼猫"
+      },
+      "犬": {
+        "word": "狗狗",
+        "owner": "狗主人",
+        "stage": "幼犬"
+      },
+      "猫犬": {
+        "word": "毛孩子",
+        "owner": "宠物主人",
+        "stage": "幼宠"
+      }
+    },
+    "demo_pools": {
+      "brand": {
+        "猫": [
+          "喵满分",
+          "毛星球",
+          "三只猫",
+          "嗷呜研究所"
+        ],
+        "犬": [
+          "汪满分",
+          "大狗小事",
+          "骨头研究所",
+          "遛弯实验室"
+        ],
+        "猫犬": [
+          "毛孩子研究所",
+          "两脚兽严选"
+        ]
+      },
+      "spec": {
+        "dry": [
+          "1.8kg",
+          "2.7kg",
+          "5.4kg",
+          "12kg"
+        ],
+        "wet": [
+          "85g × 6 罐",
+          "170g × 3 罐"
+        ],
+        "litter": [
+          "2.5kg",
+          "10L",
+          "6L"
+        ],
+        "treat": [
+          "50g",
+          "100g",
+          "200g"
+        ],
+        "other": [
+          "1 件"
+        ]
+      },
+      "ingredient": {
+        "dry": {
+          "猫": [
+            "鲜鸡肉",
+            "三文鱼",
+            "鸭肉",
+            "深海鱼油",
+            "豌豆纤维"
+          ],
+          "犬": [
+            "鸡肉",
+            "三文鱼",
+            "燕麦",
+            "牛肉",
+            "鱼油"
+          ],
+          "猫犬": [
+            "鸡肉",
+            "三文鱼",
+            "南瓜"
+          ]
+        },
+        "wet": {
+          "猫": [
+            "鸡肉",
+            "南瓜",
+            "鸡肝"
+          ],
+          "犬": [
+            "牛肉",
+            "胡萝卜",
+            "鸡胸肉"
+          ]
+        },
+        "litter": {
+          "猫": [
+            "豆腐渣",
+            "豌豆纤维",
+            "活性炭"
+          ]
+        },
+        "treat": {
+          "猫": [
+            "鸡胸肉",
+            "三文鱼"
+          ],
+          "犬": [
+            "鸡胸肉",
+            "鸭肉",
+            "牛肝"
+          ]
+        }
+      },
+      "function": {
+        "dry": {
+          "猫": [
+            "高蛋白",
+            "无谷低敏",
+            "化毛",
+            "控体重",
+            "易消化"
+          ],
+          "犬": [
+            "美毛",
+            "护关节",
+            "低敏",
+            "易消化",
+            "控体重"
+          ],
+          "猫犬": [
+            "高蛋白",
+            "易消化",
+            "控体重",
+            "美毛",
+            "护关节"
+          ]
+        },
+        "wet": {
+          "猫": [
+            "补水",
+            "高适口",
+            "主食级",
+            "易消化",
+            "低磷护肾"
+          ],
+          "犬": [
+            "补水",
+            "高适口",
+            "主食级",
+            "易消化",
+            "免疫支持"
+          ]
+        },
+        "litter": {
+          "猫": [
+            "低粉尘",
+            "结团快",
+            "可冲厕",
+            "除臭",
+            "少带出"
+          ]
+        },
+        "treat": {
+          "猫": [
+            "单一成分",
+            "高蛋白",
+            "训练奖励",
+            "适口性好"
+          ],
+          "犬": [
+            "单一成分",
+            "高蛋白",
+            "训练奖励",
+            "适口性好"
+          ]
+        }
+      },
+      "audience": {
+        "猫": [
+          "幼猫",
+          "成猫",
+          "室内猫",
+          "多猫家庭",
+          "绝育猫",
+          "老年猫"
+        ],
+        "犬": [
+          "幼犬",
+          "成犬",
+          "小型犬",
+          "中大型犬",
+          "掉毛犬",
+          "老年犬"
+        ],
+        "猫犬": [
+          "多宠家庭",
+          "幼宠",
+          "成宠"
+        ]
+      },
+      "scene": {
+        "dry": {
+          "猫": [
+            "换粮期",
+            "换季掉毛",
+            "多猫家庭",
+            "出差囤货",
+            "新猫到家"
+          ],
+          "犬": [
+            "换粮期",
+            "换季掉毛",
+            "外出训练",
+            "出差囤货",
+            "接犬回家"
+          ]
+        },
+        "wet": {
+          "猫": [
+            "日常主食",
+            "拌粮补水",
+            "挑食期"
+          ],
+          "犬": [
+            "日常主食",
+            "拌粮补水"
+          ]
+        },
+        "litter": {
+          "猫": [
+            "小户型",
+            "多猫家庭",
+            "换季"
+          ]
+        },
+        "treat": {
+          "猫": [
+            "训练奖励",
+            "剪指甲安抚",
+            "日常加餐"
+          ],
+          "犬": [
+            "训练奖励",
+            "遛弯回来",
+            "日常加餐"
+          ]
+        }
+      },
+      "number_proof": {
+        "dry": {
+          "猫": [
+            "粗蛋白 42%",
+            "粗脂肪 16%",
+            "动物蛋白 90%"
+          ],
+          "犬": [
+            "粗蛋白 32%",
+            "粗脂肪 12%",
+            "Omega-3 1.2%"
+          ],
+          "猫犬": [
+            "粗蛋白 38%",
+            "粗脂肪 14%"
+          ]
+        },
+        "wet": {
+          "猫": [
+            "水分 78%",
+            "肉含量 65%"
+          ],
+          "犬": [
+            "水分 76%",
+            "肉含量 60%"
+          ]
+        },
+        "litter": {
+          "猫": [
+            "粉尘率 0.3%",
+            "结团 3 秒",
+            "除臭 24 小时"
+          ]
+        },
+        "treat": {
+          "猫": [
+            "蛋白 78%",
+            "配料 1 种"
+          ],
+          "犬": [
+            "蛋白 72%",
+            "配料 1 种"
+          ]
+        }
+      },
+      "proof": {
+        "dry": {
+          "猫": {
+            "高蛋白": "配料表前三位都是肉，动物蛋白占比 90%",
+            "无谷低敏": "0 谷物配方，单一动物蛋白来源",
+            "化毛": "粗纤维 6%，车前子壳帮助毛球随粪便排出",
+            "控体重": "粗脂肪 16%，比同价位低 3 个百分点",
+            "易消化": "鲜肉酶解工艺，配料表可查",
+            "耐储存": "自封条 + 铝膜内袋，开封后不结块"
+          },
+          "犬": {
+            "美毛": "Omega-3 含量 1.2%，三文鱼油 + 鱼油双来源",
+            "护关节": "葡萄糖胺 800mg/kg，按体重给的量",
+            "低敏": "单一动物蛋白来源，不加谷物与肉粉",
+            "易消化": "鲜肉酶解工艺，配料表可查",
+            "控体重": "粗脂肪 12%，比同价位低 3 个百分点",
+            "耐储存": "自封条 + 铝膜内袋，开封后不结块"
+          },
+          "猫犬": {
+            "高蛋白": "配料表前三位都是肉，动物蛋白占比 88%",
+            "易消化": "鲜肉酶解工艺，配料表可查",
+            "控体重": "粗脂肪 14%，比同价位低 3 个百分点",
+            "美毛": "Omega-3 含量 1.1%，鱼油单一来源",
+            "护关节": "葡萄糖胺 700mg/kg，按体重给的量",
+            "耐储存": "自封条 + 铝膜内袋，开封后不结块"
+          }
+        },
+        "wet": {
+          "猫": {
+            "补水": "水分 78%，符合 AAFCO 主食罐标准",
+            "高适口": "肉含量 65%，开罐能看见肉",
+            "主食级": "钙磷比 1.2:1，可长期当正餐",
+            "易消化": "配料只有肉和南瓜，没有增稠胶",
+            "全阶段": "幼猫成猫同配方，不用分两袋囤",
+            "高性价比": "85g 一餐一罐，不剩半罐",
+            "低磷护肾": "磷 0.15%，比常规主食罐低"
+          },
+          "犬": {
+            "补水": "水分 76%，拌粮能多喝半碗",
+            "高适口": "肉含量 60%，块状不是肉泥",
+            "易消化": "配料只有肉和蔬菜，没有增稠胶",
+            "主食级": "钙磷比 1.2:1，可以当正餐吃",
+            "全阶段": "幼犬到老年犬同配方，不用分两袋囤",
+            "高性价比": "170g 拌粮两天吃完，不浪费",
+            "免疫支持": "加了锌和维生素 E，换季那阵用得上"
+          }
+        },
+        "litter": {
+          "猫": {
+            "低粉尘": "粉尘率 0.3%，过两遍筛才装袋",
+            "结团快": "结团时间 3 秒，铲走不留底",
+            "可冲厕": "豆腐渣做基底，少量多次可冲掉",
+            "除臭": "活性炭 + 抑菌因子做基底，不靠香精盖",
+            "耐储存": "自封条 + 铝膜内袋，开封后不结块",
+            "高性价比": "2.5kg 折算，一包能用一个多月",
+            "少带出": "砂粒 2mm 圆粒，爪缝带不出多少"
+          }
+        },
+        "treat": {
+          "猫": {
+            "单一成分": "配料表只写了鸡胸肉，没有诱食剂和淀粉",
+            "高蛋白": "蛋白 78%，一块约 2 克",
+            "训练奖励": "低温冻干，掰开能看到肌肉纤维",
+            "适口性好": "掰开就有肉香，挑食的也接",
+            "耐储存": "自封条 + 铝膜内袋，开封后不结块",
+            "高性价比": "100g 装，训练一次两块，一袋吃很久"
+          },
+          "犬": {
+            "单一成分": "配料表只写了鸡胸肉，没有诱食剂和淀粉",
+            "高蛋白": "蛋白 72%，一块约 3 克",
+            "训练奖励": "低温冻干，掰开能看到肌肉纤维",
+            "适口性好": "掰开就有肉香，挑食的也接",
+            "耐储存": "自封条 + 铝膜内袋，开封后不结块",
+            "高性价比": "100g 装，训练一次两块，一袋吃很久"
+          }
+        }
+      },
+      "gift": {
+        "dry": [
+          "试吃装 50g",
+          "计量杯",
+          "7 天换粮表"
+        ],
+        "wet": [
+          "硅胶餐盖 × 2",
+          "湿粮试吃装 85g"
+        ],
+        "litter": [
+          "猫砂铲",
+          "除臭包"
+        ],
+        "treat": [
+          "密封夹",
+          "试吃装 20g"
+        ]
+      },
+      "selling_function": {
+        "dry": {
+          "猫": [
+            "高蛋白",
+            "无谷低敏",
+            "化毛",
+            "控体重",
+            "易消化",
+            "耐储存"
+          ],
+          "犬": [
+            "美毛",
+            "护关节",
+            "低敏",
+            "易消化",
+            "控体重",
+            "耐储存"
+          ],
+          "猫犬": [
+            "高蛋白",
+            "易消化",
+            "控体重",
+            "美毛",
+            "护关节",
+            "耐储存"
+          ]
+        },
+        "wet": {
+          "猫": [
+            "补水",
+            "高适口",
+            "主食级",
+            "易消化",
+            "低磷护肾",
+            "高性价比"
+          ],
+          "犬": [
+            "补水",
+            "高适口",
+            "主食级",
+            "易消化",
+            "免疫支持",
+            "高性价比"
+          ]
+        },
+        "litter": {
+          "猫": [
+            "低粉尘",
+            "结团快",
+            "可冲厕",
+            "除臭",
+            "少带出",
+            "高性价比"
+          ]
+        },
+        "treat": {
+          "猫": [
+            "单一成分",
+            "高蛋白",
+            "训练奖励",
+            "适口性好",
+            "耐储存",
+            "高性价比"
+          ],
+          "犬": [
+            "单一成分",
+            "高蛋白",
+            "训练奖励",
+            "适口性好",
+            "耐储存",
+            "高性价比"
+          ]
+        }
+      },
+      "number_for": {
+        "dry": {
+          "猫": {
+            "高蛋白": "动物蛋白 90%",
+            "无谷低敏": "谷物 0%",
+            "化毛": "粗纤维 6%",
+            "控体重": "粗脂肪 16%",
+            "易消化": "粗蛋白 42%",
+            "耐储存": "开封 1 个月不返潮"
+          },
+          "犬": {
+            "美毛": "Omega-3 1.2%",
+            "护关节": "葡萄糖胺 800mg/kg",
+            "低敏": "蛋白来源 1 种",
+            "易消化": "粗蛋白 32%",
+            "控体重": "粗脂肪 12%",
+            "耐储存": "开封 1 个月不返潮"
+          },
+          "猫犬": {
+            "高蛋白": "动物蛋白 88%",
+            "易消化": "粗蛋白 38%",
+            "控体重": "粗脂肪 14%",
+            "美毛": "Omega-3 1.1%",
+            "护关节": "葡萄糖胺 700mg/kg",
+            "耐储存": "开封 1 个月不返潮",
+            "无谷低敏": "谷物 0%"
+          }
+        },
+        "wet": {
+          "猫": {
+            "补水": "水分 78%",
+            "高适口": "肉含量 65%",
+            "主食级": "碳水 3%",
+            "易消化": "粗蛋白 11%",
+            "低磷护肾": "磷 0.15%",
+            "高性价比": "85g × 6 罐"
+          },
+          "犬": {
+            "补水": "水分 76%",
+            "高适口": "肉含量 60%",
+            "主食级": "碳水 4%",
+            "易消化": "粗蛋白 10%",
+            "免疫支持": "锌 80mg/kg",
+            "高性价比": "170g × 3 罐"
+          }
+        },
+        "litter": {
+          "猫": {
+            "低粉尘": "粉尘率 0.3%",
+            "结团快": "结团 3 秒",
+            "可冲厕": "60 秒冲散",
+            "除臭": "24 小时不返味",
+            "少带出": "砂粒 2mm",
+            "高性价比": "2.5kg 装"
+          }
+        },
+        "treat": {
+          "猫": {
+            "单一成分": "配料 1 种",
+            "高蛋白": "蛋白 78%",
+            "训练奖励": "一块 2 克",
+            "适口性好": "冻干 36 小时",
+            "耐储存": "开封 2 个月不返潮",
+            "高性价比": "100g 装"
+          },
+          "犬": {
+            "单一成分": "配料 1 种",
+            "高蛋白": "蛋白 72%",
+            "训练奖励": "一块 3 克",
+            "适口性好": "冻干 36 小时",
+            "耐储存": "开封 2 个月不返潮",
+            "高性价比": "100g 装"
+          }
+        }
+      }
+    },
+    "selling_frames_soft": [
+      {
+        "id": "S1",
+        "template": "{pain}？{result}。"
+      },
+      {
+        "id": "S2",
+        "template": "怕{pain}的，{result}。"
+      },
+      {
+        "id": "S3",
+        "template": "担心{pain}？{result}。"
+      },
+      {
+        "id": "S4",
+        "template": "{pain}这件事，{result}。"
+      }
+    ]
+  }
+}

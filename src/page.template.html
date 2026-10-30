@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIGC 文案工作流 · 可复现的文案生产管线</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --paper:#F6F2E9;
+  --paper-2:#FBF8F1;
+  --sheet:#FFFDF8;
+  --ink:#16140F;
+  --ink-2:#4C473E;
+  --ink-3:#766E60;
+  --line:#E4DCCA;
+  --line-2:#CFC5AE;
+  --accent:#A63C21;
+  --accent-soft:#F6E7DE;
+  --green:#2C5346;
+  --green-soft:#E5EDE8;
+  --amber:#8E6524;
+  --amber-soft:#F4EBD7;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC",STSong,SimSun,Georgia,serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"SFMono-Regular","JetBrains Mono",Consolas,Menlo,monospace;
+  --r:7px;
+  --r-lg:11px;
+  --shadow-sm:0 1px 2px rgba(22,20,15,.035);
+  --shadow-md:0 24px 48px -38px rgba(22,20,15,.6);
+  --ease:cubic-bezier(.22,.68,.2,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.76;font-weight:400;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 480px at 10% -8%, rgba(166,60,33,.055), transparent 68%),
+    radial-gradient(900px 420px at 94% 2%, rgba(44,83,70,.045), transparent 70%);
+  background-attachment:fixed;
+}
+/* 纸纹：极低透明度噪点，压掉纯色屏感 */
+body::after{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection{background:rgba(166,60,33,.16);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 40px}
+[id="work"],[id="bench"],[id="method"]{scroll-margin-top:76px}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(246,242,233,.84);backdrop-filter:blur(16px) saturate(1.15);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{max-width:1240px;margin:0 auto;padding:0 40px;height:56px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;font-size:13px;font-weight:600;letter-spacing:.02em}
+.brand-mark{
+  width:25px;height:25px;border-radius:4px;background:var(--ink);color:var(--paper);
+  display:grid;place-items:center;font-family:var(--serif);font-size:11px;letter-spacing:.04em;
+  box-shadow:inset 0 0 0 1px rgba(255,253,248,.14);
+}
+.navlinks{display:flex;gap:2px;margin-left:auto}
+.navlinks a{
+  position:relative;color:var(--ink-3);text-decoration:none;
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:6px 11px;transition:color .18s;
+}
+.navlinks a::after{
+  content:"";position:absolute;left:11px;right:11px;bottom:3px;height:1px;background:var(--ink);
+  transform:scaleX(0);transform-origin:left;transition:transform .24s var(--ease);
+}
+.navlinks a:hover{color:var(--ink)}
+.navlinks a:hover::after{transform:scaleX(1)}
+
+/* ---------- 报头 ---------- */
+.hero{padding:clamp(52px,6vw,80px) 0 42px}
+.masthead{
+  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:38px;
+}
+.masthead .l{color:var(--ink-2)}
+h1{
+  font-family:var(--serif);font-weight:600;font-size:clamp(36px,4.5vw,62px);line-height:1.26;
+  letter-spacing:-.012em;margin:0 0 24px;max-width:16em;text-wrap:balance;
+}
+h1 em{
+  font-style:normal;color:var(--accent);
+  text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:rgba(166,60,33,.32);
+  text-underline-offset:.16em;
+}
+.lede{font-size:16px;line-height:1.88;color:var(--ink-2);max-width:40em;margin:0;text-wrap:pretty}
+.nb{white-space:nowrap}
+.lede b{font-weight:600;color:var(--ink)}
+.tagrow{display:flex;flex-wrap:wrap;align-items:center;margin-top:26px;padding-top:15px;border-top:1px solid var(--line)}
+.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:none;border:none;padding:0;border-radius:0}
+.tag+.tag::before{content:"·";margin:0 11px;color:var(--line-2)}
+.stats{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  margin-top:36px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.stat{padding:20px 0 19px 22px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:none;padding-left:0}
+.stat .n{display:block;font-family:var(--serif);font-size:31px;font-weight:600;line-height:1.12;letter-spacing:-.02em}
+.stat .n small{font-family:var(--sans);font-size:12px;color:var(--ink-3);font-weight:400;margin-left:3px;letter-spacing:0}
+.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+
+/* ---------- 工作区 ---------- */
+.workspace{display:grid;grid-template-columns:300px 1fr;gap:34px;align-items:start;padding-bottom:14px}
+body.mode-site .workspace{grid-template-columns:340px 1fr;gap:30px}
+.panel{
+  position:sticky;top:80px;background:var(--sheet);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-md),var(--shadow-sm);
+}
+.panel::before{
+  content:"";position:absolute;left:20px;top:0;width:36px;height:2px;background:var(--accent);
+  border-radius:0 0 2px 2px;
+}
+.panel h2{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 17px;padding-bottom:12px;border-bottom:1px solid var(--line);font-weight:600;
+}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:11.5px;color:var(--ink-2);margin-bottom:6px;font-weight:500}
+.field label span{color:var(--ink-3);font-weight:400}
+input,select{
+  width:100%;font-family:var(--sans);font-size:13.5px;color:var(--ink);background:var(--paper-2);
+  border:1px solid var(--line);border-radius:6px;padding:9px 11px;outline:none;
+  transition:border-color .16s,box-shadow .16s,background .16s;
+}
+input:hover,select:hover{border-color:var(--line-2)}
+/* background-color 而非 background：#这里若用简写，会把 select 的下拉箭头（background-image）一起重置掉 */
+input:focus,select:focus{border-color:var(--accent);background-color:#fff;box-shadow:0 0 0 3px rgba(166,60,33,.1)}
+input::placeholder{color:#B6AE9F}
+select{
+  appearance:none;-webkit-appearance:none;padding-right:30px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1.2 4.9 5 8.8 1.2' fill='none' stroke='%238A8274' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seedrow{display:flex;gap:8px}
+.seedrow input{flex:1}
+.btn{
+  font-family:inherit;font-size:13px;cursor:pointer;border-radius:6px;padding:9px 12px;
+  border:1px solid var(--line);background:var(--paper-2);color:var(--ink);
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  transition:transform .16s var(--ease),background .16s,border-color .16s,box-shadow .16s,color .16s;
+}
+.btn:hover{border-color:var(--line-2);background:#fff}
+.btn.primary{
+  background:var(--ink);color:var(--paper);border-color:var(--ink);width:100%;margin-top:8px;
+  font-weight:500;letter-spacing:.02em;box-shadow:0 10px 22px -18px rgba(22,20,15,.9);
+}
+.btn.primary:hover{background:#000;border-color:#000;transform:translateY(-1px);box-shadow:0 14px 26px -18px rgba(22,20,15,.95)}
+.btn.ghost{width:100%;margin-top:8px;font-size:12.5px;color:var(--ink-2);background:transparent;border-color:var(--line)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--ink-3);background:var(--paper-2)}
+.btn-icon{padding:8px 10px;flex:0 0 auto}
+.hint{margin-top:17px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);line-height:1.75}
+.hint code{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);background:rgba(22,20,15,.05);padding:1px 4px;border-radius:3px}
+/* 面板识别结果：一行小字，说明“狗粮”是怎么被判成犬 / 主粮的 */
+.adapt{margin:-7px 0 15px;font-size:11px;line-height:1.7;color:var(--ink-3)}
+.adapt b{color:var(--ink-2);font-weight:600}
+.adapt i{font-style:normal;color:#C6BCA9;margin:0 5px}
+.adapt.warn{color:#8A3A20}
+.adapt.warn b{color:var(--accent)}
+
+/* ---------- 变量条 ---------- */
+.results{min-width:0}
+.ctxbar{
+  background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:16px 18px;margin-bottom:30px;box-shadow:var(--shadow-sm);
+}
+.ctxbar .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-size:11.5px;background:var(--paper-2);border:1px solid var(--line);border-radius:5px;
+  padding:3px 9px;color:var(--ink-2);white-space:nowrap;
+}
+.chip b{color:var(--ink);font-weight:600}
+.chip.acc{background:var(--accent-soft);border-color:rgba(166,60,33,.22);color:#8A3A20}
+.chip.grn{background:var(--green-soft);border-color:rgba(44,83,70,.2);color:var(--green)}
+.cmdrow{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+.cmdrow .cl{
+  font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--paper);background:var(--ink);
+  padding:2.5px 6px;border-radius:3px;flex:0 0 auto;margin-top:2px;
+}
+.cmdrow code{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);line-height:1.7;overflow-wrap:break-word}
+.cmdrow code span{white-space:nowrap}
+
+/* ---------- 章节 ---------- */
+.block{margin-bottom:42px}
+.block-hd{
+  display:flex;align-items:baseline;gap:12px;margin-bottom:18px;padding-bottom:10px;
+  border-bottom:1px solid var(--line);position:relative;
+}
+.block-hd::after{
+  content:"";position:absolute;left:0;bottom:-1px;width:38px;height:1px;background:var(--accent);
+}
+.block-hd h3{font-family:var(--serif);font-size:19px;margin:0;font-weight:600;letter-spacing:.005em}
+.block-hd .idx{
+  font-family:var(--serif);font-style:italic;font-size:14px;color:var(--accent);
+  min-width:18px;letter-spacing:.02em;
+}
+.block-hd .meta{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.02em}
+
+/* ---------- 标题列表 ---------- */
+.tlist{display:flex;flex-direction:column;gap:7px}
+.titem{
+  display:flex;align-items:center;gap:14px;background:var(--sheet);border:1px solid var(--line);
+  border-radius:var(--r);padding:12px 15px;
+  transition:transform .18s var(--ease),border-color .18s,box-shadow .18s;
+}
+.titem:hover{
+  transform:translateX(2px);border-color:var(--line-2);
+  box-shadow:inset 2px 0 0 var(--accent),0 12px 26px -24px rgba(22,20,15,.8);
+}
+.titem .no{font-family:var(--mono);font-size:10px;color:var(--ink-3);width:18px;flex:0 0 18px;letter-spacing:.06em}
+.titem .txt{flex:1;font-size:14.5px;line-height:1.65;word-break:break-word}
+.titem .badge{
+  font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:4px;flex:0 0 auto;
+  background:var(--green-soft);color:var(--green);letter-spacing:.02em;
+}
+.titem .badge.warn{background:var(--accent-soft);color:var(--accent)}
+.titem .tpl{font-family:var(--mono);font-size:10px;color:var(--ink-3);flex:0 0 auto;width:30px;text-align:right;letter-spacing:.04em}
+
+/* ---------- 卖点 ---------- */
+.splist{display:flex;flex-direction:column;gap:9px}
+.sp{
+  background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;
+  transition:border-color .18s,box-shadow .18s;
+}
+.sp:hover{border-color:var(--line-2);box-shadow:0 12px 26px -26px rgba(22,20,15,.8)}
+.sp-top{display:flex;align-items:baseline;gap:11px}
+.sp-cat{
+  flex:0 0 auto;font-family:var(--sans);font-size:11px;letter-spacing:.05em;color:var(--amber);
+}
+.sp-txt{font-size:14.5px;line-height:1.72}
+.sp-flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.seg{display:flex;align-items:center;gap:6px;font-size:11.5px}
+.seg .lb{
+  font-family:var(--sans);font-size:10px;letter-spacing:.02em;color:var(--paper);background:var(--ink-3);
+  padding:2px 5px;border-radius:3px;
+}
+.seg.k1 .lb{background:#9C4B33}
+.seg.k2 .lb{background:#8C6B36}
+.seg.k3 .lb{background:#2F5A4B}
+.seg.k4 .lb{background:#465671}
+.seg .vl{color:var(--ink-2)}
+.arrow{color:var(--line-2);font-size:11px}
+
+/* ---------- 话术 ---------- */
+.cslist{display:flex;flex-direction:column;gap:10px}
+.cs{display:flex;gap:13px;align-items:flex-start}
+.cs-tag{
+  flex:0 0 46px;font-family:var(--sans);font-size:11px;letter-spacing:.03em;text-align:center;
+  padding:4px 0;border-radius:4px;margin-top:11px;
+  background:var(--paper-2);border:1px solid var(--line);color:var(--ink-2);
+}
+.cs-bubble{
+  flex:1;background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);
+  border-top-left-radius:2px;padding:12px 16px;font-size:14px;line-height:1.75;
+}
+.cs-len{display:block;text-align:right;font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:5px;letter-spacing:.02em}
+
+/* ---------- 口播：分镜 / 成片 ---------- */
+/* 用 flex 而不是 grid：三张卡的宽度必须由容器决定，
+   交给 grid 的 1fr 时会被内容（尤其是图片固有尺寸）反过来撑变形 */
+.board{display:flex;gap:14px;margin-bottom:4px;align-items:stretch}
+.board .frame{flex:1 1 0;min-width:0;width:auto}
+.frame{
+  margin:0;background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;transition:border-color .2s,box-shadow .2s;box-sizing:border-box;
+  /* 三张卡等高，说明文字占掉剩余空间，底部的「镜头提示词」才不会参差 */
+  display:flex;flex-direction:column;
+}
+.frame:hover{border-color:var(--line-2);box-shadow:0 16px 30px -28px rgba(22,20,15,.85)}
+.frame:hover img{transform:scale(1.015)}
+.frame img{transition:transform .5s var(--ease)}
+/* 图槽：内置样张 / 用户贴回来的 AI 图 / 待生成，三种状态同一块地方。
+   9:16 撑在容器上、图片绝对定位填满 —— 否则 img 的固有宽高会反过来把网格列撑变形 */
+.shot{position:relative;background:#EDE8DC;min-width:0;overflow:hidden}
+.shot:not(.blank){aspect-ratio:9/16}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.shot .tag{
+  position:absolute;left:7px;top:7px;z-index:2;
+  font-family:var(--mono);font-size:9px;letter-spacing:.05em;
+  padding:2px 6px;border-radius:3px;background:rgba(22,20,15,.62);color:#F6F2E9;
+  backdrop-filter:blur(3px);
+}
+.shot .tag.ai{background:rgba(44,83,70,.86)}
+.shot .tools{
+  position:absolute;right:6px;top:6px;z-index:2;display:flex;gap:4px;
+  opacity:0;transition:opacity .18s;
+}
+.shot:hover .tools,.shot:focus-within .tools{opacity:1}
+.shot .tools button{
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.02em;cursor:pointer;
+  padding:3px 7px;border-radius:3px;border:1px solid rgba(255,253,248,.35);
+  background:rgba(22,20,15,.66);color:#F6F2E9;backdrop-filter:blur(3px);
+}
+.shot .tools button:hover{background:rgba(166,60,33,.9);border-color:transparent}
+.shot.drop::after{
+  content:"";position:absolute;inset:6px;border:1.5px dashed var(--accent);border-radius:4px;pointer-events:none;
+}
+/* 还没生成图的时候，把提示词的第一句顶上来，空态本身也在说话 */
+.shot.blank{
+  aspect-ratio:9/16;display:flex;flex-direction:column;justify-content:flex-end;
+  gap:8px;padding:14px 13px 15px;
+  background:
+    repeating-linear-gradient(135deg,rgba(207,197,174,.16) 0 6px,transparent 6px 13px),
+    linear-gradient(170deg,#F1EAD9,#E7DECB);
+}
+.shot.blank .ph-t{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+}
+.shot.blank .ph-a{font-size:12.5px;line-height:1.6;color:var(--ink-2)}
+.shot.blank .ph-b{
+  display:flex;gap:5px;flex-wrap:wrap;margin-top:2px;
+}
+.shot.blank .ph-b button{
+  font-family:var(--sans);font-size:10.5px;cursor:pointer;padding:4px 8px;border-radius:4px;
+  border:1px solid var(--line-2);background:rgba(255,253,248,.72);color:var(--ink-2);
+}
+.shot.blank .ph-b button:hover{border-color:var(--accent);color:var(--accent)}
+
+.cap{padding:10px 12px 12px;border-top:1px solid var(--line);display:flex;flex-direction:column;flex:1 1 auto}
+.cap .r{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--accent);display:block}
+.cap .s{font-size:12px;color:var(--ink-2);display:block;margin-top:3px;line-height:1.6;flex:1 1 auto}
+
+/* 提示词：图片 / 镜头两个入口，正文放到下方整行宽的面板里 */
+.cap-btns{display:flex;gap:6px;margin-top:9px}
+.pbtn{
+  flex:1 1 0;min-width:0;text-align:center;font-family:var(--sans);font-size:10.5px;
+  padding:5px 2px;border:1px solid var(--line);border-radius:4px;background:var(--paper-2);
+  color:var(--ink-2);cursor:pointer;transition:.16s;letter-spacing:.02em;white-space:nowrap;
+}
+.pbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pbtn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pbtn.on:hover{background:var(--ink);color:var(--paper)}
+.frame.on{border-color:var(--line-2);box-shadow:0 16px 30px -26px rgba(22,20,15,.8)}
+
+.pdetail{
+  margin-top:12px;background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 16px 16px;
+}
+.pdetail[hidden]{display:none}
+.pd-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+.pd-t{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.pd-hd .alt{font-size:11px;color:var(--ink-3)}
+.pd-act{margin-left:auto;display:flex;gap:6px}
+.pd-groups{display:grid;gap:10px}
+.pd-group{border:1px solid var(--line);border-radius:6px;padding:11px 12px 12px;background:var(--paper)}
+.pd-group.hl{border-color:var(--accent);background:var(--accent-soft)}
+.pd-gh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.pd-gh .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent)}
+.pd-gh .d{font-size:11px;color:var(--ink-3)}
+.pd-gh .sp{margin-left:auto;display:flex;gap:6px}
+.pd-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pd-pair .pd-block{margin-top:0}
+@media (max-width:860px){.pd-pair{grid-template-columns:minmax(0,1fr)}}
+.pd-lb{
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;
+}
+.pd-lb button{
+  font-family:var(--sans);font-size:9.5px;letter-spacing:0;text-transform:none;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper-2);color:var(--ink-2);
+  padding:1px 6px;border-radius:3px;
+}
+.pd-lb button:hover{border-color:var(--accent);color:var(--accent)}
+.pdetail pre{
+  margin:0;font-family:var(--mono);font-size:11px;line-height:1.8;color:var(--ink-2);
+  white-space:pre-wrap;word-break:break-word;background:var(--paper-2);
+  border:1px solid var(--line);border-radius:4px;padding:10px 12px;
+}
+.pd-block + .pd-block{margin-top:12px}
+
+.bactions{margin-left:auto;display:flex;gap:6px;align-self:center;flex-wrap:wrap}
+/* 说明条：默认收起太靠上会压到下面的小标题，给它自己的边距，并且能关掉 */
+.boardtip{
+  display:flex;align-items:flex-start;gap:10px;margin:12px 0 14px;padding:7px 9px 7px 11px;
+  border:1px dashed var(--line-2);border-radius:5px;background:rgba(255,253,248,.55);
+  font-size:11px;color:var(--ink-3);line-height:1.7;
+}
+.boardtip[hidden]{display:none}
+.boardtip .bt-x{
+  flex:0 0 auto;margin-left:auto;cursor:pointer;line-height:1;
+  width:18px;height:18px;display:grid;place-items:center;border-radius:3px;
+  border:1px solid transparent;background:transparent;color:var(--ink-3);font-size:13px;
+}
+.boardtip .bt-x:hover{background:var(--paper-2);border-color:var(--line-2);color:var(--accent)}
+
+.boardtip kbd{
+  font-family:var(--mono);font-size:10px;border:1px solid var(--line-2);border-bottom-width:2px;
+  border-radius:3px;padding:0 3px;background:var(--paper-2);color:var(--ink-2);
+}.minibtn{
+  font-family:var(--sans);font-size:11px;cursor:pointer;padding:3px 9px;border-radius:4px;
+  border:1px solid var(--line-2);background:var(--sheet);color:var(--ink-2);transition:.16s;
+}
+.minibtn:hover{border-color:var(--accent);color:var(--accent)}
+.minibtn.solid{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.minibtn.solid:hover{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+
+.video{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.vseg{display:grid;grid-template-columns:86px 1fr;border-bottom:1px solid var(--line);transition:background .2s}
+.vseg:last-child{border-bottom:none}
+.vtime{padding:16px 12px;border-right:1px solid var(--line)}
+.vtime .r{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.02em}
+.vtime .s{font-family:var(--sans);font-size:11px;letter-spacing:.02em;color:var(--ink-3);margin-top:4px}
+.vbody{padding:15px 17px}
+.vline{font-size:14.5px;line-height:1.75}
+.vsub{
+  margin-top:9px;display:inline-block;font-size:11.5px;background:var(--ink);color:var(--paper);
+  padding:2.5px 9px;border-radius:4px;letter-spacing:.01em;
+}
+.vvis{margin-top:10px;display:flex;flex-wrap:wrap;gap:5px}
+.vvis span{font-size:11px;color:var(--ink-3);border:1px solid var(--line);padding:1.5px 7px;border-radius:4px}
+.vseg{cursor:pointer}
+.vseg:hover{background:var(--paper-2)}
+.vseg.on{background:var(--accent-soft)}
+.vseg.on .vtime{border-right-color:rgba(166,60,33,.28)}
+.vseg.on .vtime .r{color:var(--accent)}
+.vseg.on .vbody{box-shadow:inset 2px 0 0 var(--accent)}
+
+.subhead{display:flex;align-items:baseline;gap:9px;margin:24px 0 10px}
+.subhead .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.subhead .d{font-size:11px;color:var(--ink-3)}
+.subhead.tight{margin:0 0 10px}
+/* 两列同高：脚本列表在一列、成片在一列，谁高谁决定行高，另一边自己撑满，
+   这样底边始终齐平，不会出现「播放器矮一截、按钮悬在半空」 */
+.sfgrid{display:grid;grid-template-columns:minmax(0,1fr) clamp(200px,38%,300px);gap:20px;align-items:stretch;min-width:0}
+.sfgrid>.scol{display:flex;flex-direction:column;min-width:0;min-height:0}
+.sfgrid>.scol>.subhead{flex:0 0 auto}
+.video{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+.video .vseg{flex:1 1 auto}
+/* 播放器和按钮同一张卡：按钮贴着卡片底边，不再漂在下面 */
+.filmplate{
+  background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);padding:10px;
+  box-shadow:0 22px 44px -40px rgba(22,20,15,.9);
+  display:flex;flex-direction:column;flex:1 1 auto;min-height:0;min-width:0;
+}
+.film{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;min-width:0}
+.film video{
+  width:100%;flex:1 1 auto;min-height:0;display:block;border-radius:5px;
+  background:#15140F;aspect-ratio:9/16;object-fit:cover;
+}
+
+/* 成片位不再绑死某一条实拍：默认用当前参数的三张分镜图预演，
+   换成本地视频后就是真播放器，两个模式共用同一条时间轴去高亮左侧脚本 */
+.rehearse{
+  position:relative;border-radius:5px;overflow:hidden;background:#15140F;
+  aspect-ratio:9/16;flex:1 1 auto;min-height:0;
+}
+.rehearse img{width:100%;height:100%;object-fit:cover;display:block}
+.rehearse .stage-md{position:absolute;left:10px;top:10px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.1em;color:rgba(255,253,248,.72);background:rgba(22,20,15,.5);padding:2px 6px;border-radius:3px}
+.rehearse .rsub{
+  position:absolute;left:10px;right:10px;bottom:40px;
+  font-size:12px;line-height:1.55;color:#FFFDF8;text-shadow:0 1px 8px rgba(0,0,0,.7);
+  text-align:center;padding:0 4px;
+}
+.rehearse .rbar{position:absolute;left:0;right:0;bottom:0;height:27px;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.rehearse .rbar i{position:absolute;left:0;bottom:0;height:2.5px;background:var(--accent);width:0;display:block}
+.rehearse .rbar span{position:absolute;right:8px;bottom:7px;font-family:var(--mono);font-size:9px;color:rgba(255,253,248,.8)}
+.rehearse .rplay{
+  position:absolute;inset:0;display:grid;place-items:center;cursor:pointer;border:none;
+  background:rgba(22,20,15,.14);transition:background .2s;
+}
+.rehearse .rplay:hover{background:rgba(22,20,15,.28)}
+.rehearse .rplay em{
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,253,248,.92);color:var(--ink);font-style:normal;font-size:14px;
+  box-shadow:0 8px 24px -12px rgba(0,0,0,.8);padding-left:3px;
+}
+.rehearse.playing .rplay{background:transparent;place-items:end center;padding-bottom:44px}
+.rehearse.playing .rplay em{
+  width:26px;height:26px;font-size:10px;background:rgba(255,253,248,.5);box-shadow:none;padding-left:0;
+}
+.filmempty{
+  flex:1 1 auto;min-height:0;aspect-ratio:9/16;border-radius:5px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:9px;text-align:center;padding:20px 16px;
+  background:repeating-linear-gradient(135deg,rgba(207,197,174,.14) 0 6px,transparent 6px 13px),#F1EAD9;
+  color:var(--ink-3);
+}
+.filmempty .ft{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase}
+.filmempty .fa{font-size:11.5px;line-height:1.65;max-width:200px;color:var(--ink-2)}
+.filmtools{display:flex;gap:6px;margin-top:9px;flex:0 0 auto;flex-wrap:wrap}
+.film.drop{outline:1.5px dashed var(--accent);outline-offset:2px}
+/* 只有真的放不下（<560px）才叠放；再窄并排会把时间列挤没 */
+@media (max-width:560px){
+  .sfgrid{grid-template-columns:minmax(0,1fr);gap:16px}
+  .sfgrid>.scol:last-child{width:100%;max-width:340px;margin:0 auto}
+  .sfgrid>.scol>.filmplate{flex:0 0 auto}
+  .rehearse,.filmempty{flex:0 0 auto;aspect-ratio:9/16}
+}
+/* 并排放到 560px；窄的时候时间列收窄、正文缩一档，给字让位 */
+@media (max-width:760px){
+  .vseg{grid-template-columns:70px minmax(0,1fr)}
+  .vtime{padding:13px 8px}
+  .vtime .r{font-size:10.5px}
+  .vbody{padding:13px 13px}
+  .vline{font-size:14px}
+  .vvis span{font-size:10.5px;padding:1px 6px}
+}
+@media (max-width:640px){
+  .board{flex-direction:column;gap:12px}
+  /* 竖排时主轴变成高度，flex:1 1 0 会把卡片压成 0 高 */
+  .board .frame{flex:0 0 auto}
+  .bactions{margin-left:0;width:100%;margin-top:6px}
+  .subhead{flex-wrap:wrap}
+}
+
+/* ---------- 合规 ---------- */
+.comp{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 22px}
+.comp-status{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:600;margin-bottom:16px;letter-spacing:.01em}
+.comp-status .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;color:var(--paper)}
+.comp-status.ok .ic{background:var(--green)}
+.comp-status.bad .ic{background:var(--accent)}
+.comp-status.ok{color:var(--green)}
+.comp-status.bad{color:var(--accent)}
+.comp-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:16px;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.comp-grid div{padding:12px 0 12px 18px;border-left:1px solid var(--line)}
+.comp-grid div:first-child{border-left:none;padding-left:0}
+.comp-grid .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.comp-grid .v{font-family:var(--serif);font-size:21px;font-weight:600;margin-top:2px;letter-spacing:-.01em}
+.comp-hits{margin:0 0 14px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.comp-hits li{font-size:12.5px;background:var(--accent-soft);border-radius:5px;padding:7px 11px;color:#7C3418}
+.comp-hits code{font-family:var(--mono);font-size:11.5px}
+.comp-rules{font-size:12.5px;color:var(--ink-2)}
+.comp-rules .rt{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+.comp-rules ul{margin:0;padding-left:16px}
+.comp-rules li{margin-bottom:3px}
+.allowrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+
+/* ---------- 效率 ---------- */
+.bench{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px 24px}
+.brow{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;padding:8px 0}
+.brow+.brow{border-top:1px solid var(--line)}
+.brow .st{font-size:12.5px;color:var(--ink-2)}
+.bars{display:flex;flex-direction:column;gap:4px}
+.bar{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:9px}
+.bar .fill{height:7px;border-radius:2px;min-width:2px;transition:width .6s var(--ease)}
+.bar.m .fill{background:#D9CFB9}
+.bar.c .fill{background:var(--green)}
+.bar .num{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.legend{display:flex;gap:18px;margin-bottom:16px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+.bench-total{
+  margin-top:16px;padding-top:16px;border-top:1px solid var(--line);
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+}
+.bench-total .big{font-family:var(--serif);font-size:25px;font-weight:600;color:var(--accent);letter-spacing:-.01em}
+.bench-total .txt{font-size:12.5px;color:var(--ink-2)}
+.bench-total .txt b{color:var(--ink)}
+
+/* ---------- 表格 ---------- */
+.tablewrap{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{
+  text-align:left;font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);background:transparent;padding:11px 14px;border-bottom:1px solid var(--line);
+}
+td{padding:11px 14px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+tbody tr:hover td{background:var(--paper-2)}
+tr:last-child td{border-bottom:none}
+td.num{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+td.pos{color:var(--green);font-family:var(--mono);font-size:11.5px}
+td.neg{color:var(--accent);font-family:var(--mono);font-size:11.5px}
+
+/* ---------- 方法论 ---------- */
+.method{padding:64px 0 24px;border-top:1px solid var(--line);margin-top:34px}
+.method h2{font-family:var(--serif);font-size:28px;margin:0 0 10px;font-weight:600;letter-spacing:-.01em}
+.method .sub{color:var(--ink-2);font-size:14px;margin:0 0 30px;max-width:40em;line-height:1.85}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{
+  background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;
+  transition:border-color .18s,box-shadow .18s,transform .18s var(--ease);
+}
+.card:hover{border-color:var(--line-2);transform:translateY(-2px);box-shadow:0 20px 40px -34px rgba(22,20,15,.85)}
+.card .num{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:11px}
+.card h4{font-family:var(--serif);font-size:16px;margin:0 0 8px;font-weight:600;letter-spacing:.005em}
+.card p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.8}
+.card code{font-family:var(--mono);font-size:11.5px;background:rgba(22,20,15,.045);padding:1px 4px;border-radius:3px}
+footer{
+  padding:34px 0 52px;color:var(--ink-3);font-size:11.5px;border-top:1px solid var(--line);
+  margin-top:44px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+footer code{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+
+@media(max-width:1120px){
+  .workspace,body.mode-site .workspace{grid-template-columns:1fr;gap:24px}
+  .panel{position:static}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat{padding:18px 0 17px 18px}
+  .stat:nth-child(odd){border-left:none;padding-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .stat:last-child{grid-column:1/-1;border-left:none;padding-left:0;border-top:1px solid var(--line)}
+  .cards{grid-template-columns:1fr}
+  h1{font-size:clamp(30px,8vw,40px)}
+  .wrap,.topbar-inner{padding:0 20px}
+  .masthead{flex-direction:column;gap:4px;align-items:flex-start}
+  .comp-grid{grid-template-columns:1fr}
+  .comp-grid div{padding:10px 0 10px 0;border-left:none;border-top:1px solid var(--line)}
+  .comp-grid div:first-child{border-top:none}
+  .board{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding-bottom:6px}
+  .frame{flex:0 0 62%;scroll-snap-align:start}
+  .brow{grid-template-columns:1fr;gap:6px}
+  .navlinks{display:none}
+  .titem{flex-wrap:wrap;gap:8px}
+}
+/* 真实数据接入（site 模式） */
+body.mode-inline .only-site{display:none!important}
+body.mode-site .only-inline{display:none!important}
+/* 商品：可下拉选，也可当普通输入框写任意商品名 —— 自己的商品同样要出口播和两套提示词 */
+.combo{position:relative}
+.combo input{padding-right:34px}
+.combo-arrow{
+  position:absolute;right:1px;top:1px;bottom:1px;width:32px;
+  display:grid;place-items:center;border:0;background-color:transparent;
+  color:var(--ink-3);cursor:pointer;border-radius:0 8px 8px 0;
+  transition:color .16s,background-color .16s;
+}
+.combo-arrow:hover{color:var(--ink);background-color:rgba(16,24,40,.04)}
+.combo-arrow svg{transition:transform .2s var(--ease)}
+.combo.open .combo-arrow{color:var(--accent)}
+.combo.open .combo-arrow svg{transform:rotate(180deg)}
+
+/* 列表从输入框正下方落下（只做 Y 位移与淡入），不再有原生弹层那种是从侧边推出来的观感 */
+.combo-list{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:60;
+  max-height:270px;overflow-y:auto;padding:5px;
+  background-color:var(--sheet);border:1px solid var(--line);border-radius:11px;
+  box-shadow:0 20px 44px -24px rgba(16,24,40,.5),0 2px 8px rgba(16,24,40,.06);
+  visibility:hidden;opacity:0;transform:translateY(-6px) scale(.99);transform-origin:top center;
+  pointer-events:none;scrollbar-width:thin;scrollbar-color:rgba(124,138,160,.5) transparent;scrollbar-width:thin;scrollbar-color:rgba(124,138,160,.5) transparent;
+  transition:opacity .13s ease,transform .16s var(--ease),visibility 0s .16s;
+}
+.combo.open .combo-list{
+  visibility:visible;opacity:1;transform:none;pointer-events:auto;
+  transition:opacity .13s ease,transform .16s var(--ease),visibility 0s;
+}
+.citem{
+  display:flex;align-items:baseline;gap:8px;padding:8px 9px;border-radius:7px;
+  font-size:13px;line-height:1.45;color:var(--ink);cursor:pointer;
+}
+.citem .cn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.citem .cs{flex:0 0 auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.citem .ck{
+  flex:0 0 auto;font-size:10px;padding:1px 6px;border-radius:999px;
+  color:var(--accent);background-color:var(--accent-soft);
+}
+.citem:hover,.citem.act{background-color:var(--accent-soft)}
+.citem.on{font-weight:600}
+.citem.on .cn::after{content:" · 当前";font-weight:400;font-size:10.5px;color:var(--ink-3)}
+/* 库里没有的名字：单独一条出口，别让人猜「我写的算不算数」 */
+.citem-new{margin-top:4px;padding-top:9px;border-top:1px dashed var(--line)}
+.citem-new .cn{color:var(--accent)}
+.citem-new .ck{color:#fff;background-color:var(--accent)}
+.combo-list::-webkit-scrollbar{width:9px}
+.combo-list::-webkit-scrollbar-track{background-color:transparent}
+.combo-list::-webkit-scrollbar-thumb{
+  background-color:rgba(124,138,160,.34);border-radius:99px;
+  border:2px solid transparent;background-clip:padding-box;
+}
+.combo-list::-webkit-scrollbar-thumb:hover{background-color:rgba(124,138,160,.55)}
+.cempty{padding:11px 10px;font-size:12px;line-height:1.6;color:var(--ink-3)}
+.cempty b{color:var(--ink-2);font-weight:600}
+.prodmeta{margin-top:7px;font-size:11.5px;color:var(--ink-3);line-height:1.7}
+.prodmeta b{color:var(--ink-2);font-weight:600}
+.prodmeta .sep{color:var(--line-2);margin:0 5px}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.btnrow .btn{margin:0}
+.apibar{
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--ink-3);
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:7px 0;margin:0 0 12px;
+}
+.apibar .dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex:0 0 auto}
+.apibar .dot.off{background:var(--accent)}
+.apibar b{color:var(--ink-2);font-weight:600}
+.apibar .sep{color:var(--line-2)}
+.notice{
+  border:1px solid rgba(166,60,33,.3);background:rgba(166,60,33,.045);
+  border-radius:6px;padding:9px 12px;font-size:12px;color:#7E3018;line-height:1.75;margin:11px 0 0;
+}
+.notice b{font-weight:600}
+.hist{display:flex;flex-direction:column}
+.hrow{
+  display:grid;grid-template-columns:42px minmax(0,1fr) 138px 96px;gap:12px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px;
+}
+.hrow:last-child{border-bottom:none}
+.hrow .hid{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.hrow .hp{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow .hp em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:8px}
+.hrow .hm{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.hrow .hx{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.hrow .acts{display:flex;gap:9px;justify-content:flex-end}
+.hrow .acts a,.hrow .acts button{
+  font-size:11.5px;color:var(--ink-2);background:none;border:0;border-bottom:1px solid var(--line-2);
+  padding:0 0 1px;cursor:pointer;font-family:var(--sans);transition:color .16s,border-color .16s;
+}
+.hrow .acts a:hover,.hrow .acts button:hover{color:var(--accent);border-color:var(--accent)}
+.hrow.cur{background:rgba(166,60,33,.04)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.primary.busy{position:relative;color:transparent}
+.btn.primary.busy::after{
+  content:"";position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-7px 0 0 -7px;
+  border:1.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:960px){
+  .hrow{grid-template-columns:34px minmax(0,1fr) 84px;gap:8px}
+  .hrow .hx{display:none}
+  .hrow .hp em{display:none}
+}
+</style>
+</head>
+<body class="mode-__MODE__">
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-mark">AG</span><span>AIGC 文案工作流</span></div>
+    <nav class="navlinks">
+      <a href="#work">生成器</a>
+      <a href="#bench">效率测算</a>
+      <a href="#method">方法论</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="masthead">
+      <span class="l">Case study — 宠物主粮电商文案</span>
+      <span>01 / 文案工程 · v1.0.0</span>
+    </div>
+    <h1>把一篇商品文案，从 <em>5 分钟</em> 压到 <em>3 分钟</em></h1>
+    <p class="lede only-inline">这不是一个「让 AI 随便写」的提示词，而是一条<b>可复现的文案生产管线</b>：模板库管结构与合规，<span class="nb">脚本</span>管变量注入与组合去重。同一个随机种子，命令行与网页输出<b>逐字一致</b>。</p>
+    <p class="lede only-site">这不是一个「让 AI 随便写」的提示词，而是一条<b>有据可查的文案生产管线</b>：商品事实来自云端商品库，模型只负责表达；30 字上限、80 字话术、极限词替换、条数补齐这些红线，由页面里的规则层在模型输出之后再扫一遍。模型跑偏或没连上时，整条链路退化成模板引擎，页面上会明确标出来。</p>
+    <div class="tagrow">
+      <span class="tag only-inline">Python CLI</span>
+      <span class="tag only-inline">单文件引擎</span>
+      <span class="tag only-inline">MT19937 复刻</span>
+      <span class="tag only-inline">零依赖</span>
+      <span class="tag only-site">真实商品库</span>
+      <span class="tag only-site">大模型生成</span>
+      <span class="tag only-site">输出后置校验</span>
+      <span class="tag only-site">云端留痕</span>
+      <span class="tag only-site">免密钥调用</span>
+      <span class="tag">合规词表 39</span>
+    </div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <div class="workspace" id="work">
+    <aside class="panel">
+      <h2>参数面板</h2>
+
+      <div class="field">
+        <label>商品 <span>· 选一个，或直接输入</span></label>
+        <div class="combo" id="prod-combo">
+          <input id="f-product" value="无谷鲜肉成猫粮" placeholder="选一个，或直接输入，如 狗粮 / 豆腐猫砂"
+                 autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false"
+                 aria-controls="prod-list" aria-autocomplete="list">
+          <button type="button" class="combo-arrow only-site" id="prod-toggle" tabindex="-1" aria-label="展开商品列表">
+            <svg width="11" height="7" viewBox="0 0 11 7" aria-hidden="true"><path d="M1 1.1 5.5 5.6 10 1.1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="combo-list only-site" id="prod-list" role="listbox" aria-label="商品库"></div>
+        </div>
+        <div class="prodmeta" id="prod-meta"></div>
+      </div>
+      <div class="adapt only-inline" id="f-adapt"></div>
+      <div class="row2">
+        <div class="field">
+          <label>到手价 <span>元</span></label>
+          <input id="f-price" type="number" value="129" min="1" step="1">
+        </div>
+        <div class="field">
+          <label>标题条数</label>
+          <select id="f-count">
+            <option>3</option><option>4</option><option selected>5</option>
+            <option>6</option><option>7</option><option>8</option>
+          </select>
+        </div>
+      </div>
+      <div class="field only-inline">
+        <label>规格 <span>· 留空则从词池抽取</span></label>
+        <input id="f-spec" value="1.8kg" placeholder="如 1.8kg / 12kg">
+      </div>
+      <div class="field only-inline">
+        <label>目标人群</label>
+        <input id="f-audience" value="1-3岁室内猫主人" placeholder="如 1-3岁室内猫主人">
+      </div>
+      <div class="field">
+        <label>发布平台 <span>· 决定补充词表</span></label>
+        <select id="f-platform">
+          <option value="tmall" selected>tmall（天猫/淘宝）</option>
+          <option value="jd">jd（京东）</option>
+          <option value="amazon">amazon（亚马逊）</option>
+        </select>
+      </div>
+      <div class="field only-inline">
+        <label>随机种子 <span>· 同种子同结果</span></label>
+        <div class="seedrow">
+          <input id="f-seed" type="number" value="7" min="0" step="1">
+          <button class="btn btn-icon" id="btn-dice" title="换一个种子">⟳</button>
+        </div>
+      </div>
+      <button class="btn primary only-inline" id="btn-gen">重新生成</button>
+      <button class="btn primary only-site" id="btn-ai">生成文案</button>
+      <button class="btn ghost only-inline" id="btn-bad">注入极限词 · 测试合规拦截</button>
+      <button class="btn ghost only-inline" id="btn-md">复制为 Markdown 报告</button>
+      <div class="btnrow only-site">
+        <button class="btn ghost" id="btn-export-md">导出 .md</button>
+        <button class="btn ghost" id="btn-export-csv">导出 .csv</button>
+      </div>
+      <div class="notice" id="notice" hidden></div>
+      <div class="hint only-inline">
+        输入框改动即实时重算。商品名里的<b>品类与物种</b>（狗粮 / 猫砂 / 罐头 / 零食）决定用哪套词池，
+        写着「狗粮」就不会掉出室内猫；<code>seed</code> 决定变量的抽取顺序，与命令行 <code>--seed</code> 完全等价。
+      </div>
+      <div class="hint only-site">
+        商品事实取自商品库，模型只改表达。换商品时，量词（袋/罐/包）、物种称呼和卖点都会跟着换；
+        改价格或平台后，重新点一次「生成文案」。
+      </div>
+    </aside>
+
+    <section class="results">
+      <div class="apibar only-site" id="apibar"></div>
+      <div class="ctxbar">
+        <div class="lbl">本次注入的变量</div>
+        <div class="chips" id="ctxchips"></div>
+        <div class="cmdrow only-inline"><span class="cl">CLI</span><code id="cmdline"></code></div>
+      </div>
+
+      <div class="block">
+        <div class="block-hd">
+          <span class="idx">01</span><h3>商品标题</h3>
+          <span class="meta" id="meta-title"></span>
+        </div>
+        <div class="tlist" id="out-titles"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-hd">
+          <span class="idx">02</span><h3>卖点文案</h3>
+          <span class="meta">痛点 → 证据 → 结果 → 数字</span>
+        </div>
+        <div class="splist" id="out-sp"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-hd">
+          <span class="idx">03</span><h3>客服话术</h3>
+          <span class="meta">售前 / 物流 / 售后 / 催付 · ≤80 字</span>
+        </div>
+        <div class="cslist" id="out-cs"></div>
+      </div>
+
+      <div class="block" id="block-video">
+        <div class="block-hd">
+          <span class="idx">04</span><h3>短视频口播</h3>
+          <span class="meta" id="meta-video"></span>
+        </div>
+
+        <div class="subhead">
+          <span class="t">分镜配图</span>
+          <span class="d" id="board-note">每格一份图片提示词 + 镜头提示词 · 图可换成本地 / AI 生成的</span>
+          <span class="bactions">
+            <button class="minibtn" id="btn-copy-prompts">复制全部提示词</button>
+            <button class="minibtn" id="btn-prompts-md">导出分镜.md</button>
+            <button class="minibtn" id="btn-tip" hidden>换图说明</button>
+          </span>
+        </div>
+        <div class="board" id="out-board"></div>
+        <div class="boardtip" id="board-tip">
+          <span>每格都能换图：拖一张进来、<kbd>Ctrl</kbd>+<kbd>V</kbd> 粘贴，或点「换图」上传；<b>图片提示词</b>拿去生图，<b>镜头提示词</b>拿去拍，都随参数现算，换品类自动跟着变，成片位同理。</span>
+          <button class="bt-x" id="tip-x" title="隐藏这条说明" aria-label="隐藏说明">×</button>
+        </div>
+        <div class="pdetail" id="out-pdetail" hidden></div>
+
+        <div class="sfgrid">
+          <div class="scol">
+            <div class="subhead tight"><span class="t">口播脚本</span><span class="d">点段落跳转</span></div>
+            <div class="video" id="out-video"></div>
+          </div>
+          <div class="scol">
+            <div class="subhead tight"><span class="t">成片</span><span class="d" id="film-note">分镜预演 · 可换成本地视频</span></div>
+            <div class="filmplate">
+              <div class="film" id="out-film"></div>
+              <div class="filmtools" id="film-tools"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-hd">
+          <span class="idx">05</span><h3>合规检查</h3>
+          <span class="meta">极限词 · 平台补充词 · 长词优先匹配</span>
+        </div>
+        <div class="comp" id="out-comp"></div>
+      </div>
+
+      <div class="block only-site">
+        <div class="block-hd">
+          <span class="idx">06</span><h3>生成记录</h3>
+          <span class="meta" id="meta-history">最近 20 条 · 存于云端</span>
+        </div>
+        <div class="hist" id="out-history"><div class="hrow"><span class="hid">—</span><span class="hp">正在读取…</span></div></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="method" id="bench">
+    <h2>效率测算</h2>
+    <p class="sub">撰写环节被压到 3 秒，但审校 2 分钟不能省 —— 那是脚本不替人做判断的地方。所有数字按同一口径拆解，可直接复算。</p>
+    <div class="bench" id="out-bench"></div>
+    <div style="height:16px"></div>
+    <div class="tablewrap" id="out-batch"></div>
+  </section>
+
+  <section class="method" id="method">
+    <h2>三个设计决定</h2>
+    <p class="sub">为什么这套东西比「让模型自由发挥」更可靠。</p>
+    <div class="cards">
+      <div class="card">
+        <div class="num">01 / 分工</div>
+        <h4>模板管结构，脚本管变量</h4>
+        <p>标题骨架、卖点四段结构、话术场景、口播分镜、分镜提示词都写在 <code>copy_templates.json</code> 里，改文案不用改代码；脚本只负责占位符填充、30 字校验、超长回退与批次去重。</p>
+      </div>
+      <div class="card">
+        <div class="num">02 / 合规</div>
+        <h4>极限词先拦，再谈创意</h4>
+        <p>35 个极限词 + 平台补充词，长词优先匹配避免「最好」被拆成「更」+「好」；白名单护住「最后」「第一时间」这类中性时间表述。命中即按映射表替换并告警。</p>
+      </div>
+      <div class="card">
+        <div class="num">03 / 复现</div>
+        <h4>同种子，逐字同结果</h4>
+        <p>前端内置 CPython 3.13 的 MT19937 实现（含 <code>choice</code> / <code>shuffle</code> / <code>sample</code> 的抽取语义），因此网页生成结果与命令行 <code>python aigc_copywriter.py --seed 7</code> 完全一致。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="only-inline">AIGC 文案工作流 · 模板库 v1.0.0 · 单文件引擎</span>
+    <span class="only-site">AIGC 文案工作流 · 云端商品库 10 SKU · 模型生成 + 规则后置校验</span>
+    <span class="only-inline"><code>seed</code> 可复现 · 数字为演示占位，投放前须替换为实测值</span>
+    <span class="only-site">每次生成存于云端记录（公开可见） · 数字为演示占位，投放前须替换为实测值</span>
+  </footer>
+</div>
+
+<script>const BUILD_MODE = '__MODE__';</script>
+<script>const TEMPLATES = /*__DATA__*/;</script>
+<script>const STORYBOARD = /*__STORYBOARD__*/;</script>
+<script>const FILM = /*__FILM__*/;</script>
+<script>/*__ENGINE__*/</script>
+<script>/*__FACETS__*/</script>
+<script>/*__PROMPTS__*/</script>
+<script>/*__POST__*/</script>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  let last = null;
+  let filmSync = () => {};
+
+  function params() {
+    return {
+      product: $('f-product').value || '无谷鲜肉成猫粮',
+      price: parseFloat($('f-price').value) || 129,
+      spec: $('f-spec').value.trim(),
+      audience: $('f-audience').value.trim(),
+      platform: $('f-platform').value,
+      count: parseInt($('f-count').value, 10),
+      seed: parseInt($('f-seed').value, 10) || 0,
+    };
+  }
+
+  // ---------------------------------------------------------- 静态统计
+  function renderStats() {
+    const s = TEMPLATES.sections;
+    const comp = s.compliance;
+    const bm = AIGCEngine.benchmark();
+    const items = [
+      { n: s.title_templates.length, k: '标题模板', u: '个' },
+      { n: s.selling_points.length, k: '卖点结构', u: '类' },
+      { n: comp.banned_terms.length + ((comp.platform_extra_terms || {}).tmall || []).length, k: '合规词表', u: '条' },
+      { n: '−' + Math.round(bm.savePct), k: '撰写耗时', u: '%' },
+      { n: s.cs_scripts.length, k: '客服场景', u: '条' },
+    ];
+    $('stats').innerHTML = items.map((i) =>
+      `<div class="stat"><div class="n">${i.n}<small>${i.u}</small></div><div class="k">${i.k}</div></div>`
+    ).join('');
+  }
+
+  // ---------------------------------------------------------- 分镜：图槽 + 提示词
+  // 配图不再写死三张猫粮：每格都有按当前参数算出来的提示词，
+  // 图可以是内置样张、你自己贴回来的 AI 生成图，也可以空着等生成。
+  const PR = window.__PROMPTS || null;
+  const SHOT_STORE = 'aigc.shots.v1';
+  let shotStore = {};
+  let shotPlan = null;
+  let shotCtx = null;
+  let activeShot = 0;
+  let promptIdx = -1;   // 哪一格的提示词正摊在下面，-1 表示都收着
+  let promptKey = 'img'; // 摊开的是图片组还是镜头组：img / cam
+  let film = { mode: 'none', src: '', poster: '', label: '' };
+
+  function loadShots() {
+    try { shotStore = JSON.parse(localStorage.getItem(SHOT_STORE) || '{}') || {}; } catch (e) { shotStore = {}; }
+  }
+  function saveShots() {
+    try { localStorage.setItem(SHOT_STORE, JSON.stringify(shotStore)); } catch (e) { /* 配额满了就算了，别打断渲染 */ }
+  }
+  function shotKey() {
+    return shotCtx ? PR.keyOf(shotCtx) : '_';
+  }
+  function shotList() {
+    const k = shotKey();
+    if (!shotStore[k]) shotStore[k] = [];
+    return shotStore[k];
+  }
+  // 内置样张只在品类对得上时才拿来充数，狗粮的文案配一张猫粮图比空着更假
+  function sampleOk(i) {
+    const b = STORYBOARD[i];
+    if (!b || !shotCtx) return false;
+    const tags = b.kinds || [];
+    const me = shotCtx.kind + '|' + shotCtx.species;
+    return tags.indexOf(me) >= 0 || tags.indexOf(shotCtx.kind) >= 0;
+  }
+  /* 样张各自记着拍的是什么动作（倒粮 / 捏颗粒 / 包装陈列）。
+     文案说「倒出主粮」就把倒粮那张配过去 —— 载入老记录时段落顺序和样张顺序
+     对不上，也不会出现图和字各说各话的情况。 */
+  const SHOT_TAGS = [
+    [/倒|撕|开袋|撒|倒进|落进/, 'pour'],
+    [/捏|掰|压|切面|断面/, 'pinch'],
+    [/包装|陈列|并排|并列|摆放|赠品|同框/, 'pack'],
+  ];
+  function shotTagOf(action) {
+    const text = String(action || '');
+    for (let i = 0; i < SHOT_TAGS.length; i++) if (SHOT_TAGS[i][0].test(text)) return SHOT_TAGS[i][1];
+    return '';
+  }
+  function sampleFor(i, action) {
+    const tag = shotTagOf(action);
+    if (tag) {
+      for (let k = 0; k < STORYBOARD.length; k++) {
+        if (sampleOk(k) && STORYBOARD[k].shot === tag) return STORYBOARD[k];
+      }
+    }
+    return sampleOk(i) ? STORYBOARD[i] : null;
+  }
+  function sampleOf(i) {
+    const s = shotPlan && shotPlan.shots[i];
+    return sampleFor(i, s ? s.action : '');
+  }
+  function shotSrc(i) {
+    const list = shotList();
+    return list[i] || (sampleOf(i) || {}).src || '';
+  }
+
+  function renderBoard(r) {
+    const plan = shotPlan;
+    if (!plan) { $('out-board').innerHTML = ''; return; }
+    const list = shotList();
+    // 先按文案把样张分好：同一张图不能同时出现在两格里
+    const usedSrc = new Set();
+    const samps = plan.shots.map((s, i) => {
+      if (list[i]) return null;
+      let cand = sampleFor(i, s.action);
+      if (cand && usedSrc.has(cand.src)) cand = sampleOk(i) ? STORYBOARD[i] : null;
+      if (cand && usedSrc.has(cand.src)) cand = null;
+      if (cand) usedSrc.add(cand.src);
+      return cand;
+    });
+    const note = $('board-note');
+    if (note) {
+      const mineN = plan.shots.filter((s, i) => !!list[i]).length;
+      const sampN = samps.filter(Boolean).length;
+      note.textContent = mineN ? `${mineN} 张已替换 · 其余按提示词生成`
+        : sampN ? `示例样张 ${sampN} 张 · 其余待生成，提示词随参数走`
+        : '三格都待生成 · 复制提示词去生图，回来 Ctrl+V 直接贴上';
+    }
+    $('out-board').innerHTML = plan.shots.map((s, i) => {
+      const mine = list[i];
+      const samp = samps[i];
+      const src = mine || (samp ? samp.src : '');
+      const head = src
+        ? `<div class="shot" data-i="${i}">
+             <span class="tag${mine ? ' ai' : ''}">${mine ? 'AI 生成 · 已替换' : '示例样张'}</span>
+             <div class="tools"><button data-act="up">换图</button>${mine ? '<button data-act="reset">还原</button>' : ''}</div>
+             <img src="${src}" alt="${esc(s.stage)}分镜配图" loading="lazy">
+           </div>`
+        : `<div class="shot blank" data-i="${i}">
+             <div class="ph-t">待生成 · ${esc(s.range)}</div>
+             <div class="ph-a">${esc(s.action)}</div>
+             <div class="ph-b"><button data-act="paste" data-i="${i}">贴图 / 上传</button><button data-act="prompt" data-i="${i}">看提示词</button></div>
+           </div>`;
+      return `<figure class="frame${promptIdx === i ? ' on' : ''}">
+        ${head}
+        <figcaption class="cap">
+          <span class="r">${esc(s.range)} · ${esc(s.stage)}</span>
+          <span class="s">${esc(s.action)}</span>
+          <div class="cap-btns">
+            <button class="pbtn${promptIdx === i && promptKey === 'img' ? ' on' : ''}" data-act="prompt" data-k="img" data-i="${i}">图片提示词</button>
+            <button class="pbtn${promptIdx === i && promptKey === 'cam' ? ' on' : ''}" data-act="prompt" data-k="cam" data-i="${i}">镜头提示词</button>
+          </div>
+        </figcaption>
+      </figure>`;
+    }).join('');
+    renderPdetail();
+  }
+
+  // 提示词正文单独一块地方：图片和镜头分成两组，各自中英两段
+  function renderPdetail() {
+    const host = $('out-pdetail');
+    if (!host) return;
+    const s = shotPlan && promptIdx >= 0 ? shotPlan.shots[promptIdx] : null;
+    if (!s) { host.hidden = true; host.innerHTML = ''; return; }
+    host.hidden = false;
+    const pair = (zk, ek) => `
+      <div class="pd-pair">
+        <div class="pd-block">
+          <div class="pd-lb"><span>中文</span><button data-act="pd-copy" data-k="${zk}">复制</button></div>
+          <pre>${esc(s[zk])}</pre>
+        </div>
+        <div class="pd-block">
+          <div class="pd-lb"><span>English</span><button data-act="pd-copy" data-k="${ek}">复制</button></div>
+          <pre>${esc(s[ek])}</pre>
+        </div>
+      </div>`;
+    host.innerHTML = `
+      <div class="pd-hd">
+        <span class="pd-t">${esc(s.range)} · ${esc(s.stage)}</span>
+        ${s.alt.length ? `<span class="alt">备选镜头：${esc(s.alt.join('；'))}</span>` : ''}
+        <span class="pd-act"><button class="minibtn" data-act="pd-close">收起</button></span>
+      </div>
+      <div class="pd-groups">
+        <section class="pd-group${promptKey === 'img' ? ' hl' : ''}">
+          <div class="pd-gh">
+            <span class="t">图片提示词</span><span class="d">画什么 · 拿去生图（即梦 / MJ / Nano Banana）</span>
+            <span class="sp"><button class="minibtn" data-act="pd-copy" data-k="img">复制中英两段</button></span>
+          </div>
+          ${pair('img_zh', 'img_en')}
+        </section>
+        <section class="pd-group${promptKey === 'cam' ? ' hl' : ''}">
+          <div class="pd-gh">
+            <span class="t">镜头提示词</span><span class="d">怎么拍 · 景别 / 机位 / 焦段 / 运动 / 节奏</span>
+            <span class="sp"><button class="minibtn" data-act="pd-copy" data-k="cam">复制中英两段</button></span>
+          </div>
+          ${pair('cam_zh', 'cam_en')}
+        </section>
+      </div>`;
+  }
+
+  /* 图片统一缩到 720 宽再存：原图直接塞 localStorage 三五张就把配额撑爆 */
+  function shrink(file, cb) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const w = Math.min(720, img.naturalWidth || 720);
+      const h = Math.round(w * (img.naturalHeight || 1280) / (img.naturalWidth || 720));
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      cb(cv.toDataURL('image/jpeg', 0.86));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); cb(''); };
+    img.src = url;
+  }
+
+  function putShot(i, file) {
+    if (!file || !/^image\//.test(file.type)) return;
+    shrink(file, (data) => {
+      if (!data) return;
+      shotList()[i] = data;
+      saveShots();
+      renderBoard(last.r);
+      renderFilm(last.r);
+    });
+  }
+
+  function pickShot(i) {
+    activeShot = i;
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = () => { if (inp.files && inp.files[0]) putShot(i, inp.files[0]); };
+    inp.click();
+  }
+
+  function clip(text, hint) {
+    const done = () => flash(hint || '已复制');
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+    } else fallback(text, done);
+  }
+  function flash(msg) {
+    let el = $('aigc-flash');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'aigc-flash';
+      el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:99;' +
+        'background:#16140F;color:#F6F2E9;font-size:12px;padding:7px 14px;border-radius:5px;' +
+        'letter-spacing:.02em;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(-4px)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%)'; }, 1500);
+  }
+
+  // ---------------------------------------------------------- 成片：预演 / 本地视频
+  const clock = { t: 0, playing: false, raf: 0 };
+  let filmEl = null;
+
+  function parseRange(s) {
+    const m = String(s || '').match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
+    return m ? [parseFloat(m[1]), parseFloat(m[2])] : [0, 0];
+  }
+  function segAt(t) {
+    const segs = (last && last.r.video.segments) || [];
+    let idx = 0;
+    segs.forEach((s, i) => { if (t + 0.03 >= parseRange(s.range)[0]) idx = i; });
+    return idx;
+  }
+
+  function paintPreview() {
+    const host = $('out-film');
+    if (!host || film.mode === 'video' || !shotPlan) return;
+    const segs = last.r.video.segments;
+    const idx = segAt(clock.t);
+    const img = host.querySelector('.rehearse img');
+    const src = shotSrc(idx) || shotSrc(0);
+    if (img && src && img.getAttribute('src') !== src) img.src = src;
+    const sub = host.querySelector('.rsub');
+    if (sub) sub.textContent = (segs[idx] && segs[idx].subtitle) || '';
+    const md = host.querySelector('.stage-md');
+    if (md) md.textContent = (segs[idx] ? segs[idx].range + ' · ' + segs[idx].stage : '');
+    const bar = host.querySelector('.rbar i');
+    const total = last.r.video.total || 25;
+    if (bar) bar.style.width = Math.min(100, clock.t / total * 100).toFixed(2) + '%';
+    const tt = host.querySelector('.rbar span');
+    if (tt) tt.textContent = clock.t.toFixed(1) + 's / ' + total + 's';
+  }
+
+  function playPreview() {
+    if (!last || film.mode === 'video') return;
+    const total = last.r.video.total || 25;
+    if (clock.playing) return;
+    if (clock.t >= total - 0.05) clock.t = 0;
+    clock.playing = true;
+    const host = $('out-film');
+    if (host) host.querySelector('.rehearse').classList.add('playing');
+    const t0 = performance.now() - clock.t * 1000;
+    // 先同步画一帧：点段落跳转要立刻看到画面换，不能等下一帧
+    paintPreview(); filmSync();
+    const tick = () => {
+      clock.t = (performance.now() - t0) / 1000;
+      if (clock.t >= total) {
+        clock.t = total; clock.playing = false;
+        if (host) host.querySelector('.rehearse').classList.remove('playing');
+        paintPreview(); filmSync();
+        return;
+      }
+      paintPreview(); filmSync();
+      clock.raf = requestAnimationFrame(tick);
+    };
+    clock.raf = requestAnimationFrame(tick);
+  }
+
+  function pausePreview() {
+    clock.playing = false;
+    cancelAnimationFrame(clock.raf);
+    const host = $('out-film');
+    if (host && host.querySelector('.rehearse')) host.querySelector('.rehearse').classList.remove('playing');
+  }
+
+  function renderFilm(r) {
+    const host = $('out-film');
+    if (!host) return;
+    const plan = shotPlan;
+    const segs = (r && r.video && r.video.segments) || [];
+    const total = (r && r.video && r.video.total) || 25;
+    filmEl = null;
+
+    if (film.mode === 'video') {
+      host.innerHTML = `<video src="${film.src}"${film.poster ? ` poster="${film.poster}"` : ''} controls playsinline preload="metadata"></video>`;
+      filmEl = host.querySelector('video');
+      ['timeupdate', 'seeked', 'loadedmetadata'].forEach((ev) => filmEl.addEventListener(ev, () => filmSync()));
+      clock.playing = false;
+    } else if (plan && plan.shots.some((s, i) => !!shotSrc(i))) {
+      const first = shotSrc(segAt(clock.t)) || shotSrc(0);
+      host.innerHTML = `<div class="rehearse">
+        <img src="${first}" alt="分镜预演">
+        <span class="stage-md">${esc((segs[segAt(clock.t)] || {}).range || '')} · ${esc((segs[segAt(clock.t)] || {}).stage || '')}</span>
+        <div class="rsub"></div>
+        <button class="rplay" data-act="play" aria-label="播放预演"><em>▶</em></button>
+        <div class="rbar"><i></i><span>0.0s / ${total}s</span></div>
+      </div>`;
+      paintPreview();
+    } else {
+      host.innerHTML = `<div class="filmempty">
+        <div class="ft">还没有成片</div>
+        <div class="fa">上传本地视频，或者先把分镜图生成出来，用三段分镜做预演。</div>
+      </div>`;
+    }
+
+    const tools = [
+      '<button class="minibtn solid" data-act="up-film">上传成片</button>',
+      film.mode === 'video'
+        ? '<button class="minibtn" data-act="rehearse">用分镜预演</button>'
+        : (FILM ? '<button class="minibtn" data-act="sample">载入示例成片</button>' : ''),
+      film.mode === 'video' ? '<button class="minibtn" data-act="clear-film">移除</button>' : '',
+    ].filter(Boolean).join('');
+    $('film-tools').innerHTML = tools;
+
+    const note = $('film-note');
+    if (note) {
+      note.textContent = film.mode === 'video'
+        ? (film.label || '本地视频') + ' · 点左侧段落可跳转'
+        : '分镜预演 · 可换成本地视频';
+    }
+  }
+
+  function uploadFilm(file) {
+    if (!file || !/^video\//.test(file.type)) { flash('请选一个视频文件'); return; }
+    if (film.src) URL.revokeObjectURL(film.src);
+    film = { mode: 'video', src: URL.createObjectURL(file), poster: '', label: file.name };
+    clock.t = 0;
+    renderFilm(last.r);
+  }
+
+  function filmSeek(i) {
+    const seg = (last && last.r.video.segments[i]) || null;
+    if (!seg) return;
+    const t = parseRange(seg.range)[0];
+    if (film.mode === 'video' && filmEl) {
+      filmEl.currentTime = t;
+      const pr = filmEl.play();
+      if (pr && pr.catch) pr.catch(() => {});
+    } else {
+      clock.t = t;
+      pausePreview();
+      playPreview();
+    }
+  }
+
+  // ---------------------------------------------------------- 适配提示
+  // 面板上就写着「狗粮」，产出不该是室内猫：把识别结果摊开给人看
+  function paintAdapt(f) {
+    const box = $('f-adapt');
+    if (!box) return;
+    if (!f) { box.innerHTML = ''; box.classList.remove('warn'); return; }
+    const note = f.audienceNote || {};
+    let html = `已识别 <b>${esc(f.speciesWord)}</b><i>·</i><b>${esc(f.kindWord)}</b><i>·</i>按「${esc(f.unit)}」计`;
+    if (note.conflict && note.typed) {
+      html += `<i>·</i>人群「${esc(note.typed)}」与商品物种不符，按 <b>${esc(note.used)}</b> 写`;
+      box.classList.add('warn');
+    } else {
+      box.classList.remove('warn');
+    }
+    box.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------- 渲染
+  function render(given) {
+    const p = params();
+    // 只有形状对得上才当作外部传入的结果（服务端 / app.js），否则本地重算：
+    // 面板里手输的商品名要先过品类/物种适配层，不能直接进猫粮词池
+    let r, facets = null;
+    if (given && given.ctx && Array.isArray(given.titles)) {
+      r = given;
+    } else if (window.__POST && window.__POST.baselinePanel) {
+      const pack = window.__POST.baselinePanel(TEMPLATES, p);
+      r = pack.result;
+      facets = pack.facets;
+    } else {
+      r = AIGCEngine.generate(TEMPLATES, p);
+    }
+    last = { p, r };
+    paintAdapt(facets);
+
+    // 变量 chips
+    const c = r.ctx;
+    const chips = [
+      ['品牌', c.brand, 'acc'], ['成分', c['核心成分'], ''], ['功能', c['功能'], ''],
+      ['人群', c['人群'], ''], ['场景', c['场景'], ''], ['数字卖点', c['数字卖点'], ''],
+      ['赠品', c['赠品'], ''], ['仓', c['仓'], ''], ['运单号', c['运单号'], ''],
+    ];
+    $('ctxchips').innerHTML = chips.map(([k, v, cls]) =>
+      `<span class="chip ${cls}">${k} <b>${esc(v)}</b></span>`).join('');
+
+    // 等价命令行（与当前参数一一对应）
+    const cmd = ['python aigc_copywriter.py', `--product "${r.ctx.product}"`, `--price ${r.ctx.price}`];
+    if (p.spec) cmd.push(`--spec ${r.ctx.spec}`);
+    if (p.audience) cmd.push(`--audience "${r.ctx.audience}"`);
+    cmd.push(`--platform ${p.platform}`, `--count ${p.count}`, `--seed ${p.seed}`);
+    $('cmdline').innerHTML = cmd.map((s) => `<span>${esc(s)}</span>`).join(' ');
+
+    // 标题
+    $('meta-title').textContent = `${r.titles.length} 条 · ≤30 字 · Jaccard 去重`;
+    $('out-titles').innerHTML = r.titles.map((t, i) => {
+      const over = t.chars > 30;
+      return `<div class="titem">
+        <span class="no">${String(i + 1).padStart(2, '0')}</span>
+        <span class="txt">${esc(t.text)}</span>
+        <span class="badge${over ? ' warn' : ''}">${t.chars}字</span>
+        <span class="tpl">${t.template}</span>
+      </div>`;
+    }).join('');
+
+    // 卖点
+    $('out-sp').innerHTML = r.sellingPoints.map((s) => {
+      const p4 = s.parts;
+      return `<div class="sp">
+        <div class="sp-top">
+          <span class="sp-cat">${esc(s.category)}</span>
+          <span class="sp-txt">${esc(s.text)}</span>
+        </div>
+        <div class="sp-flow">
+          ${[['痛点', 'k1'], ['证据', 'k2'], ['结果', 'k3'], ['数字', 'k4']]
+            // 商品没有这个字段就整段不显示，别留一个空的「数字」格子
+            .filter(([k]) => String(p4[k] || '').trim())
+            .map(([k, cls], i) => `${i ? '<span class="arrow">→</span>' : ''}<span class="seg ${cls}"><span class="lb">${k}</span><span class="vl">${esc(p4[k])}</span></span>`)
+            .join('')}
+        </div>
+      </div>`;
+    }).join('');
+
+    // 话术
+    $('out-cs').innerHTML = r.csScripts.map((s) => `
+      <div class="cs">
+        <div class="cs-tag">${esc(s.scene)}</div>
+        <div class="cs-bubble">${esc(s.text)}<span class="cs-len">${s.chars}/${s.limit}${s.over ? ' · 超长' : ''}</span></div>
+      </div>`).join('');
+
+    // 口播
+    $('meta-video').textContent = `${r.video.total}s · ${r.video.ratio} · 三段式`;
+
+    // 分镜：ctx 已带 kind/species/形态/成分，提示词引擎只需这一份事实
+    shotCtx = r.ctx;
+    shotPlan = PR ? PR.plan(r.ctx, r.video, (TEMPLATES.sections || {}).storyboard || {}) : null;
+    renderBoard(r);
+
+    $('out-video').innerHTML = r.video.segments.map((s, i) => `
+      <div class="vseg" data-i="${i}">
+        <div class="vtime"><div class="r">${esc(s.range)}</div><div class="s">${esc(s.stage)}</div></div>
+        <div class="vbody">
+          <div class="vline">${esc(s.line)}</div>
+          <div class="vsub">${esc(s.subtitle)}</div>
+          <div class="vvis">${s.visual.map((v) => `<span>${esc(v)}</span>`).join('')}</div>
+        </div>
+      </div>`).join('');
+    renderFilm(r);
+    filmSync(); // 重渲染后恢复成片当前段落的高亮
+
+    // 合规
+    const cp = r.compliance;
+    const hitKeys = Object.keys(cp.detail);
+    const ok = cp.total === 0;
+    const scanN = r.titles.length + r.sellingPoints.length + r.csScripts.length + r.video.segments.length;
+    $('out-comp').innerHTML = `
+      <div class="comp-status ${ok ? 'ok' : 'bad'}">
+        <span class="ic">${ok ? '✓' : '!'}</span>
+        ${ok ? '合规检查通过 · 0 处命中' : `命中 ${cp.total} 处，已按映射表替换`}
+      </div>
+      <div class="comp-grid">
+        <div><div class="k">扫描条目</div><div class="v">${scanN}</div></div>
+        <div><div class="k">极限词</div><div class="v">${cp.baseCount}</div></div>
+        <div><div class="k">平台补充词</div><div class="v">${cp.extraCount}</div></div>
+      </div>
+      ${hitKeys.length ? `<ul class="comp-hits">${hitKeys.map((k) =>
+        `<li><code>${esc(k)}</code> × ${cp.detail[k]} → 已替换为 <code>${esc(cp.mapping[k] || '（删去）')}</code></li>`).join('')}</ul>` : ''}
+      <div class="comp-rules">
+        <div class="rt">平台规则 · ${esc(p.platform)} · 风险等级 ${esc(cp.rules.level || '-')}</div>
+        <ul>${(cp.rules.focus || []).map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
+      </div>
+      <div class="allowrow">${cp.allow.map((a) =>
+        `<span class="chip grn">白名单 ${esc(a)}${cp.allowSeen[a] ? ' × ' + cp.allowSeen[a] : ''}</span>`).join('')}</div>
+    `;
+
+    renderBench(r.benchmark);
+    renderBatch(r.batch);
+  }
+
+  function renderBench(bm) {
+    const max = Math.max(...bm.rows.map((r) => Math.max(r.manual, r.collab)));
+    const rows = bm.rows.map((r) => `
+      <div class="brow">
+        <div class="st">${esc(r.stage)}</div>
+        <div class="bars">
+          <div class="bar m"><span class="num">${r.manual}s</span>
+            <span class="fill" style="width:${(r.manual / max * 100).toFixed(1)}%"></span></div>
+          <div class="bar c"><span class="num">${r.collab}s</span>
+            <span class="fill" style="width:${(r.collab / max * 100).toFixed(1)}%"></span></div>
+        </div>
+      </div>`).join('');
+    $('out-bench').innerHTML = `
+      <div class="legend">
+        <span><i style="background:#D9CFB9"></i>纯人工</span>
+        <span><i style="background:#2C5346"></i>人机协作</span>
+      </div>
+      ${rows}
+      <div class="bench-total">
+        <span class="big">${bm.manual}s → ${bm.collab}s</span>
+        <span class="txt">单篇耗时下降 <b>${bm.savePct.toFixed(1)}%</b>；
+        其中新增 120s 人工审校（合规 + 数据核对），这段不可省。</span>
+      </div>`;
+  }
+
+  function renderBatch(rows) {
+    $('out-batch').innerHTML = `
+      <table>
+        <thead><tr><th>批量</th><th>纯人工</th><th>人机协作（含模板库建设 45 分钟）</th><th>单篇摊薄</th><th>节省</th></tr></thead>
+        <tbody>${rows.map((r) => `
+          <tr>
+            <td>${r.n} 篇</td>
+            <td class="num">${r.manual.toFixed(1)} 分钟</td>
+            <td class="num">${r.withBuild.toFixed(1)} 分钟</td>
+            <td class="num">${r.perPiece.toFixed(2)} 分钟</td>
+            <td class="${r.savePct >= 0 ? 'pos' : 'neg'}">${r.savePct >= 0 ? '' : '−'}${Math.abs(r.savePct).toFixed(1)}%</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // ---------------------------------------------------------- 导出
+  function toMarkdown(r, p) {
+    const L = [];
+    L.push('# AIGC 文案工作流 · 生成报告', '');
+    L.push(`| 参数 | 值 |`, `| --- | --- |`);
+    L.push(`| 商品 | ${r.ctx.product} |`, `| 到手价 | ${r.ctx.price} 元 |`,
+           `| 规格 | ${r.ctx.spec} |`, `| 人群 | ${r.ctx.audience || '（取词池）'} |`,
+           `| 平台 | ${p.platform} |`, `| 种子 | ${p.seed} |`, '');
+    L.push(`## 1. 商品标题（${r.titles.length} 条）`, '', '| # | 标题 | 字数 | 模板 |', '| --- | --- | --- | --- |');
+    r.titles.forEach((t, i) => L.push(`| ${i + 1} | ${t.text} | ${t.chars} | ${t.template} |`));
+    L.push('', `## 2. 卖点（${r.sellingPoints.length} 条）`, '', '| # | 卖点 | 类型 |', '| --- | --- | --- |');
+    r.sellingPoints.forEach((s, i) => L.push(`| ${i + 1} | ${s.text} | ${s.category} |`));
+    L.push('', `## 3. 客服话术（${r.csScripts.length} 条）`, '');
+    r.csScripts.forEach((s) => L.push(`**${s.scene}**（${s.chars}/${s.limit} 字）`, '', `> ${s.text}`, ''));
+    L.push(`## 4. 短视频口播（${r.video.total}s · ${r.video.ratio}）`, '', '| 时间 | 阶段 | 口播 | 花字 |', '| --- | --- | --- | --- |');
+    r.video.segments.forEach((s) => L.push(`| ${s.range} | ${s.stage} | ${s.line} | ${s.subtitle} |`));
+    if (shotPlan) {
+      L.push('', '### 4.1 分镜配图提示词', '',
+        '主镜动作取自镜头提示，镜头语言与风格写在 `sections.storyboard`；中文给即梦/可灵，英文给 Nano Banana Pro / Midjourney。', '');
+      shotPlan.shots.forEach((s) => {
+        L.push(`**${s.range} · ${s.stage}**`, '', '中文提示词：', '', '```', s.zh, '```', '', 'English prompt：', '', '```', s.en, '```');
+        if (s.alt.length) L.push('', `备选镜头：${s.alt.join('；')}`);
+        L.push('');
+      });
+    }
+    L.push('', '## 5. 合规检查', '');
+    L.push(r.compliance.total
+      ? `- 命中 ${r.compliance.total} 处，已替换：` + Object.keys(r.compliance.detail).map((k) => `${k} × ${r.compliance.detail[k]}`).join('；')
+      : '- 合规检查：通过（0 处命中）');
+    L.push('', '> 数字为演示占位，正式投放前须替换为实测值。');
+    return L.join('\n');
+  }
+
+  function csvCell(v) {
+    return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  }
+
+  function csvOf(r) {
+    const rows = [['类型', '序号', '场景/时间', '内容', '字数']];
+    r.titles.forEach((t, i) => rows.push(['标题', i + 1, '', t.text, t.chars]));
+    r.sellingPoints.forEach((s, i) => rows.push(['卖点', i + 1, s.category, s.text, s.text.length]));
+    r.csScripts.forEach((s) => rows.push(['客服话术', '', s.scene, s.text, s.chars]));
+    r.video.segments.forEach((s) => rows.push(['口播', '', s.range + ' ' + s.stage, s.line + ' / ' + s.subtitle, s.line.length]));
+    return rows.map((row) => row.map(csvCell).join(',')).join('\r\n');
+  }
+
+  function copyMd() {
+    const md = toMarkdown(last.r, last.p);
+    const done = () => { $('btn-md').textContent = '已复制到剪贴板'; setTimeout(() => { $('btn-md').textContent = '复制为 Markdown 报告'; }, 1600); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(md).then(done).catch(() => fallback(md, done));
+    } else fallback(md, done);
+  }
+  function fallback(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动选择文本'); }
+    document.body.removeChild(ta);
+  }
+
+  // ---------------------------------------------------------- 事件
+  // 站点版的参数联动交给 app.js（它需要商品的词池顶替），避免两套监听互相打架
+  ['f-product', 'f-price', 'f-spec', 'f-audience', 'f-platform', 'f-count', 'f-seed'].forEach((id) => {
+    if (BUILD_MODE === 'site') return;
+    const el = $(id);
+    el.addEventListener('input', () => render());
+    el.addEventListener('change', () => render());
+  });
+  $('btn-gen').addEventListener('click', () => {
+    $('f-seed').value = Math.floor(Math.random() * 9999) + 1;
+    render();
+  });
+  $('btn-dice').addEventListener('click', () => {
+    $('f-seed').value = Math.floor(Math.random() * 9999) + 1;
+    render();
+  });
+  $('btn-bad').addEventListener('click', () => {
+    const on = $('btn-bad').dataset.on === '1';
+    if (on) {
+      $('f-product').value = '无谷鲜肉成猫粮';
+      $('btn-bad').textContent = '注入极限词 · 测试合规拦截';
+      $('btn-bad').dataset.on = '0';
+    } else {
+      $('f-product').value = '最好的全网第一无谷鲜肉成猫粮';
+      $('btn-bad').textContent = '还原商品名';
+      $('btn-bad').dataset.on = '1';
+    }
+    render();
+  });
+  $('btn-md').addEventListener('click', copyMd);
+
+  // 供 site 模式的 app.js 驱动：换数据源、重渲染、取当前结果
+  window.__AIGC = {
+    render,
+    params,
+    esc,
+    markdownOf: (r, p) => toMarkdown(r, p),
+    csvOf: (r) => csvOf(r),
+    isSite: BUILD_MODE === 'site',
+    get last() { return last; },
+  };
+
+  // 播放位置落在哪一段，就高亮哪一行脚本（视频与预演共用）
+  filmSync = () => {
+    if (!last) return;
+    const t = (film.mode === 'video' && filmEl) ? filmEl.currentTime : clock.t;
+    const idx = segAt(t);
+    Array.from(document.querySelectorAll('#out-video .vseg'))
+      .forEach((el, k) => el.classList.toggle('on', k === idx));
+  };
+
+  // ---------------------------------------------------------- 分镜 / 成片的交互
+  $('out-board').addEventListener('pointerdown', (e) => {
+    const shot = e.target.closest('.shot');
+    if (shot) activeShot = +shot.dataset.i || 0;
+  });
+
+  $('out-board').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn || !shotPlan) return;
+    const act = btn.dataset.act;
+    const i = btn.dataset.i !== undefined ? +btn.dataset.i
+      : (btn.closest('.shot') ? +btn.closest('.shot').dataset.i : 0);
+    const list0 = shotList();
+    if (act === 'prompt') {
+      const k = btn.dataset.k || 'img';
+      const same = promptIdx === i && promptKey === k;
+      promptIdx = same ? -1 : i;
+      promptKey = k;
+      renderBoard(last.r);
+      const box = $('out-pdetail');
+      if (box && promptIdx >= 0) {
+        const g = box.querySelectorAll('.pd-group')[k === 'cam' ? 1 : 0];
+        (g || box).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      return;
+    }
+    if (act === 'up' || act === 'paste') { pickShot(i); return; }
+    if (act === 'reset') {
+      list0[i] = null;
+      saveShots();
+      renderBoard(last.r);
+      renderFilm(last.r);
+      flash('已还原成样张 / 空态');
+    }
+  });
+
+  $('out-pdetail').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn || !shotPlan || promptIdx < 0) return;
+    const s = shotPlan.shots[promptIdx];
+    const act = btn.dataset.act;
+    if (act === 'pd-close') { promptIdx = -1; renderBoard(last.r); return; }
+    if (act === 'pd-copy') {
+      const k = btn.dataset.k;
+      if (k === 'img') return clip('【图片提示词 · 中文】\n' + s.img_zh + '\n\n【Image prompt · English】\n' + s.img_en, '图片提示词已复制（中英两段）');
+      if (k === 'cam') return clip('【镜头提示词 · 中文】\n' + s.cam_zh + '\n\n【Camera · English】\n' + s.cam_en, '镜头提示词已复制（中英两段）');
+      return clip(s[k] || '', /_en$/.test(k) ? 'English 已复制' : '中文已复制');
+    }
+  });
+
+  // 拖一张图进来就换这一格；dragover 要 preventDefault 才收得到 drop
+  ['dragover', 'dragenter'].forEach((ev) => {
+    $('out-board').addEventListener(ev, (e) => {
+      if (!shotPlan) return;
+      const shot = e.target.closest('.shot');
+      if (!shot) return;
+      e.preventDefault();
+      shot.classList.add('drop');
+      e.dataTransfer.dropEffect = 'copy';
+    });
+  });
+  ['dragleave', 'dragend'].forEach((ev) => {
+    $('out-board').addEventListener(ev, (e) => {
+      const shot = e.target.closest('.shot');
+      if (shot) shot.classList.remove('drop');
+    });
+  });
+  $('out-board').addEventListener('drop', (e) => {
+    const shot = e.target.closest('.shot');
+    if (!shot) return;
+    e.preventDefault();
+    shot.classList.remove('drop');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) putShot(+shot.dataset.i || 0, f);
+  });
+
+  // 在生图工具里生成完，回到页面直接 Ctrl+V 贴到刚点过的那一格
+  document.addEventListener('paste', (e) => {
+    if (!shotPlan || !e.clipboardData) return;
+    const items = Array.from(e.clipboardData.items || []);
+    const img = items.find((it) => /^image\//.test(it.type));
+    if (!img) return;
+    const file = img.getAsFile();
+    if (!file) return;
+    e.preventDefault();
+    putShot(activeShot, file);
+    flash('已贴到第 ' + (activeShot + 1) + ' 格');
+  });
+
+  // 换图说明：看过一次就够，关掉后记在本地，需要时从右上角再叫回来
+  const TIP_KEY = 'aigc.tip.v1';
+  const tipHidden = () => { try { return localStorage.getItem(TIP_KEY) === 'off'; } catch (e) { return false; } };
+  function applyTip() {
+    const tip = $('board-tip');
+    const back = $('btn-tip');
+    if (!tip || !back) return;
+    tip.hidden = tipHidden();
+    back.hidden = !tip.hidden;
+  }
+  function setTip(hide) {
+    try { localStorage.setItem(TIP_KEY, hide ? 'off' : 'on'); } catch (e) { /* 存不了就只在本次生效 */ }
+    applyTip();
+  }
+  $('tip-x').addEventListener('click', () => { setTip(true); flash('已收起说明 · 右上角「换图说明」可再打开'); });
+  $('btn-tip').addEventListener('click', () => setTip(false));
+  applyTip();
+
+  $('btn-copy-prompts').addEventListener('click', () => {
+    if (!shotPlan) return;
+    clip(shotPlan.text, '提示词已复制：图片 + 镜头两组，商品图和三段分镜都在');
+  });
+  $('btn-prompts-md').addEventListener('click', () => {
+    if (!shotPlan || !last) return;
+    const name = String(last.r.ctx.product || '商品').replace(/[\\/:*?"<>|]/g, '');
+    const blob = new Blob([shotPlan.text], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `分镜提示词_${name}.md`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    flash('已导出分镜提示词 .md');
+  });
+
+  $('out-video').addEventListener('click', (e) => {
+    const seg = e.target.closest('.vseg');
+    if (seg) filmSeek(+seg.dataset.i || 0);
+  });
+
+  $('out-film').addEventListener('click', (e) => {
+    if (e.target.closest('[data-act="play"]') || e.target.closest('.rehearse')) {
+      if (clock.playing) { pausePreview(); filmSync(); } else playPreview();
+    }
+  });
+
+  $('film-tools').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    if (act === 'up-film') {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'video/*';
+      inp.onchange = () => { if (inp.files && inp.files[0]) uploadFilm(inp.files[0]); };
+      inp.click();
+    } else if (act === 'rehearse') {
+      if (film.src) URL.revokeObjectURL(film.src);
+      film = { mode: 'none', src: '', poster: '', label: '' };
+      renderFilm(last.r);
+    } else if (act === 'clear-film') {
+      if (film.src) URL.revokeObjectURL(film.src);
+      film = { mode: 'none', src: '', poster: '', label: '' };
+      renderFilm(last.r);
+    } else if (act === 'sample' && FILM) {
+      film = { mode: 'video', src: FILM.src, poster: FILM.poster || '', label: '示例成片 · 猫粮样片' };
+      renderFilm(last.r);
+    }
+  });
+
+  ['dragover', 'dragenter'].forEach((ev) => {
+    $('out-film').addEventListener(ev, (e) => { e.preventDefault(); $('out-film').classList.add('drop'); });
+  });
+  ['dragleave', 'dragend'].forEach((ev) => {
+    $('out-film').addEventListener(ev, () => $('out-film').classList.remove('drop'));
+  });
+  $('out-film').addEventListener('drop', (e) => {
+    e.preventDefault();
+    $('out-film').classList.remove('drop');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) uploadFilm(f);
+  });
+
+  loadShots();
+  renderStats();
+  render();
+})();
+</script>
+/*__APP_TAG__*/
+</body>
+</html>

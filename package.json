@@ -1,0 +1,13 @@
+{
+  "name": "aigc-copy-workflow",
+  "version": "1.1.0",
+  "private": true,
+  "description": "宠物主粮电商文案生成管线：云端商品库 + 免密钥大模型表达 + 页面内合规兜底 + 云端记录",
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "node src/build.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

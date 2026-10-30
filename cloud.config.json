@@ -1,0 +1,8 @@
+{
+  "_note": "云服务 publicConfig，由 workbuddy_cloud_service 开通时返回。publishableKey 只标识应用、本身无权限，服务端按域名 Origin 校验，可以放在前端；环境 ID 与厂商密钥不在其中。",
+  "applicationId": "wbapp_btvv6au53VSykk1X66h76l",
+  "resourceId": "wbcs_OYjsOG0C4RcP87uFOakiSa",
+  "endpoint": "https://aigc-copy-workflow.app.workbuddy.host",
+  "oauthRelayBaseUrl": "https://www.workbuddy.cn/v2/as/genie-baas/oauth",
+  "publishableKey": "wbpk_btvv6au53VSykk1X66h76l_bKCBpH02ZVI23WN4LozJk4Mk3dUjZNE6"
+}

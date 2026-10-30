@@ -1,0 +1,316 @@
+/* ============================================================
+   组件层 v3 · 照着「让页面立刻高级的 7 个词」重做控件
+   ------------------------------------------------------------
+   1 Backdrop Blur 毛玻璃   2 Soft Shadow 轻阴影
+   3 Subtle Border 1px 细边框   4 Noise 噪点
+   5 Gradient Mesh 渐变网格   6 Bento Grid 便当盒
+   7 Typography 字体层级
+   只覆盖组件的颜色/描边/圆角/阴影/过渡与字号层级，不动任何布局栅格。
+   回滚：把这一行从 build.js 里摘掉即可。
+   禁令：本文件不写 background 简写（会重置 select 箭头的 background-image）。
+   ============================================================ */
+
+:root{
+  /* 细边框：一条低对比的 1px 线，能看清边界但不刺眼 */
+  --hair:1px solid rgba(16,24,40,.085);
+  --hair-strong:1px solid rgba(16,24,40,.135);
+  --hair-light:1px solid rgba(255,255,255,.72);
+  /* 白卡上的边：白压白时看不清边界，得用一层更淡的深色线兜底 */
+  --edge:0 0 0 1px rgba(16,24,40,.055);
+  /* 控件底色：白得刚刚好，透出一点背后的雾 */
+  --fill-1:rgba(255,255,255,.74);
+  --fill-2:rgba(255,255,255,.92);
+  /* 顶部内高光：让面像是「有厚度的一层」而不是一块色 */
+  --bevel:inset 0 1px 0 rgba(255,255,255,.9);
+  /* 输入框是「凹」的：上沿压一道极淡的内阴影，和凸起的卡片分开 */
+  --sink:inset 0 1px 2px rgba(16,24,40,.06),inset 0 0 0 1px rgba(16,24,40,.02);
+  /* 焦点环 */
+  --ring:0 0 0 3px rgba(89,139,253,.15);
+  /* 三级阴影：贴地的接触阴影 + 一层扩散 */
+  --lift-1:0 1px 2px rgba(16,24,40,.045);
+  --lift-2:0 2px 6px rgba(16,24,40,.05),0 14px 30px -22px rgba(46,84,158,.4);
+  --lift-3:0 2px 8px rgba(16,24,40,.055),0 28px 56px -34px rgba(46,84,158,.5);
+  --ease:cubic-bezier(.22,.68,.2,1);
+}
+
+/* ------------------------------------------------------------
+   1 画布：渐变网格再柔一档 + 颗粒更细
+   原来的四层光斑太「亮」，高级感来自低饱和的几盏灯，不是彩灯。
+   ------------------------------------------------------------ */
+body{
+  background-image:
+    radial-gradient(112% 96% at 2% -18%,rgba(72,126,247,.44),transparent 70%),
+    radial-gradient(106% 92% at 100% -16%,rgba(38,170,196,.40),transparent 72%),
+    radial-gradient(98% 88% at 86% 42%,rgba(118,204,198,.40),transparent 70%),
+    radial-gradient(94% 86% at -4% 76%,rgba(84,140,244,.28),transparent 72%),
+    linear-gradient(180deg,#EDF3FF 0%,#DCE8F7 46%,#E8F2FB 100%);
+}
+/* 噪点：颗粒要细、透明度要低，只加质感，不能被「看见」 */
+body::after{opacity:.03;background-size:160px 160px}
+
+::selection{background-color:rgba(89,139,253,.18);color:var(--ink)}
+
+/* 细滚动条：默认那条粗灰条是「一眼 AI」的重灾区 */
+*::-webkit-scrollbar{width:11px;height:11px}
+*::-webkit-scrollbar-track{background-color:transparent}
+*::-webkit-scrollbar-thumb{
+  background-color:rgba(124,138,160,.34);border-radius:999px;
+  border:3px solid transparent;background-clip:content-box;
+}
+*::-webkit-scrollbar-thumb:hover{background-color:rgba(124,138,160,.55)}
+*{scrollbar-width:thin;scrollbar-color:rgba(124,138,160,.4) transparent}
+
+/* ------------------------------------------------------------
+   7 字体层级：数字一律等宽，标题收紧字距，标签统一小一号
+   数字不对齐是「散」的主要来源
+   ------------------------------------------------------------ */
+body{font-feature-settings:"tnum" 1,"cv11" 1}
+.stat .n,.bench .brow b,.comp-grid b,.prodmeta,.vtime .r,.chip b,.ctxbar code{
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;
+}
+.stat .n{letter-spacing:-.035em}
+.block-hd h3{letter-spacing:-.015em}
+.panel h2,.block-hd .idx{letter-spacing:.16em}
+.field label{
+  font-size:11px;font-weight:560;letter-spacing:.01em;color:var(--ink-2);margin-bottom:7px;
+}
+.field label span{font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+
+/* ------------------------------------------------------------
+   3+1 输入类控件：细边框 + 内高光 + 焦点环
+   ------------------------------------------------------------ */
+input,select,textarea{
+  border:1px solid rgba(16,24,40,.12);border-radius:12px;background-color:var(--fill-2);
+  box-shadow:var(--sink);
+  font-size:13.5px;padding:10px 12px;min-height:40px;
+  transition:border-color .18s,box-shadow .18s,background-color .18s;
+}
+input:hover,select:hover,textarea:hover{
+  border-color:rgba(89,139,253,.42);background-color:#fff;
+  box-shadow:inset 0 1px 2px rgba(16,24,40,.05),0 1px 4px -1px rgba(46,84,158,.14);
+}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(89,139,253,.85);background-color:#fff;
+  box-shadow:var(--ring),inset 0 1px 2px rgba(16,24,40,.03);
+}
+input::placeholder{color:#AEB9CB}
+select{
+  background-repeat:no-repeat;background-position:right 13px center;background-size:10px 7px;
+  padding-right:32px;
+}
+/* 数字输入框的上下小箭头：原生那两个灰块很脏，直接用系统能力藏掉 */
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* 商品下拉：浮层做成一张「纸」，压在三层阴影上 */
+.combo-arrow{border-radius:0 11px 11px 0}
+.combo-arrow:hover{background-color:rgba(89,139,253,.09);color:#3766D6}
+.combo-list{
+  border:var(--hair);border-radius:14px;background-color:rgba(255,255,255,.94);
+  backdrop-filter:blur(26px) saturate(1.8);-webkit-backdrop-filter:blur(26px) saturate(1.8);
+  box-shadow:0 0 0 1px rgba(255,255,255,.7),var(--lift-3);
+  padding:6px;
+}
+.citem{border-radius:9px;padding:9px 10px;transition:background-color .14s,color .14s}
+.citem:hover,.citem.act{background-color:rgba(89,139,253,.1)}
+.citem.on{background-color:rgba(89,139,253,.08)}
+.citem .ck{letter-spacing:.02em}
+.citem-new{border-top:1px dashed rgba(16,24,40,.12)}
+
+/* 商品事实三行：贴一条细线，读起来像「附注」而不是正文 */
+.prodmeta{
+  margin-top:8px;padding:6px 2px 0;border-top:1px dashed rgba(16,24,40,.09);
+  font-size:11px;letter-spacing:.01em;
+}
+.prodmeta b{color:var(--ink-2);font-weight:600}
+
+/* ------------------------------------------------------------
+   2+3 按钮：主按钮带内高光，悬停抬 1px，按下回落
+   ------------------------------------------------------------ */
+.btn{
+  border:1px solid rgba(16,24,40,.11);border-radius:12px;background-color:rgba(255,255,255,.86);
+  box-shadow:var(--bevel),var(--lift-1);
+  font-size:12.5px;font-weight:520;letter-spacing:.01em;padding:9px 13px;
+  transition:transform .18s var(--ease),box-shadow .18s,background-color .18s,border-color .18s,color .18s;
+}
+.btn:hover{
+  background-color:#fff;border-color:rgba(89,139,253,.38);color:#2F62D8;
+  box-shadow:var(--bevel),var(--lift-2);transform:translateY(-1px);
+}
+.btn:active{transform:translateY(0) scale(.99);box-shadow:var(--bevel),var(--lift-1)}
+.btn.primary{
+  border:0;background-image:var(--grad);color:#fff;font-weight:560;
+  font-size:13.5px;padding:11px 14px;border-radius:12px;
+  box-shadow:0 10px 22px -14px rgba(69,124,240,.9),inset 0 1px 0 rgba(255,255,255,.34),inset 0 -1px 0 rgba(12,32,74,.1);
+  transition:transform .18s var(--ease),box-shadow .22s,filter .22s;
+}
+.btn.primary:hover{
+  transform:translateY(-1px);filter:brightness(1.06) saturate(1.04);
+  box-shadow:0 16px 30px -16px rgba(69,124,240,1),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(12,32,74,.12);
+}
+.btn.primary:active{transform:translateY(0) scale(.995)}
+/* ghost 按钮在玻璃面板里不该比面板还白，否则一块块白斑：默认透明，只在悬停时变白 */
+.btn.ghost{background-color:transparent;border-color:rgba(16,24,40,.13);box-shadow:none;color:var(--ink)}
+.btn.ghost:hover{background-color:#fff;border-color:rgba(89,139,253,.34);color:#2F62D8;box-shadow:var(--bevel),var(--lift-1)}
+.btn-icon{min-width:40px}
+/* 未生成记录时导出按钮是禁用的：给一个明确的「不可点」观感，别让人以为坏了 */
+.btn.ghost:disabled,.btnrow .btn:disabled{opacity:.5;cursor:not-allowed;background-color:transparent;border-color:rgba(16,24,40,.09);color:var(--ink-3)}
+.btn.ghost:disabled:hover,.btnrow .btn:disabled:hover{transform:none;background-color:transparent;color:var(--ink-3)}
+.btnrow{gap:0}
+.btnrow .btn{border-radius:0;border-color:rgba(16,24,40,.11);background-color:transparent;box-shadow:none;color:var(--ink-2)}
+.btnrow .btn:first-child{border-radius:11px 0 0 11px}
+.btnrow .btn:last-child{border-radius:0 11px 11px 0;border-left:0}
+.btnrow .btn:hover{background-color:#fff;color:#2F62D8;transform:none;box-shadow:none}
+.btnrow .btn:first-child:hover{border-right-color:rgba(89,139,253,.38)}
+.btnrow .btn:active{transform:scale(.995);background-color:rgba(255,255,255,.9)}
+
+/* 分段按钮（图片/镜头提示词）：选中态给一点「按下去」的厚度 */
+.pbtn{
+  border:var(--hair);background-color:var(--fill-1);box-shadow:var(--bevel);
+  transition:transform .16s var(--ease),background-color .16s,border-color .16s,box-shadow .16s;
+}
+.pbtn:hover{background-color:#fff;transform:translateY(-1px);box-shadow:var(--bevel),var(--lift-2)}
+.pbtn.on{
+  border:0;background-image:var(--grad);color:#fff;
+  box-shadow:0 8px 18px -12px rgba(69,124,240,.95),inset 0 1px 0 rgba(255,255,255,.32);
+}
+.pbtn.on:hover{transform:translateY(-1px)}
+
+/* ------------------------------------------------------------
+   6 参数面板：字段分组做成便当格
+   ------------------------------------------------------------ */
+.panel{border:1px solid rgba(255,255,255,.78);border-radius:24px}
+/* 到手价 / 条数 两格合成一块凹槽，视觉上是一组，而不是两个独立的框 */
+.panel .row2{
+  gap:10px;padding:12px 12px 0;margin-bottom:15px;
+  background-color:rgba(89,139,253,.055);border:1px solid rgba(89,139,253,.12);border-radius:16px;
+  box-shadow:inset 0 1px 2px rgba(16,24,40,.03);
+}
+.panel .row2 .field{margin-bottom:12px}
+.panel .row2 .field label{margin-bottom:6px}
+/* 面板里的小标题：加一条等宽的小刻度，像便当盒的标签 */
+.panel h2{color:var(--ink-3)}
+
+/* 提示条 */
+.notice{
+  border:1px solid rgba(89,139,253,.22);border-radius:12px;background-color:rgba(89,139,253,.07);
+  box-shadow:inset 2px 0 0 rgba(89,139,253,.5);
+  font-size:11.5px;padding:9px 11px;
+}
+.hint{border-top:1px dashed rgba(16,24,40,.1);font-size:10.5px;line-height:1.8}
+
+/* 变量条 */
+.ctxbar{border:1px solid rgba(16,24,40,.06);box-shadow:var(--edge),var(--lift-2)}
+.chip{
+  border:var(--hair);background-color:rgba(255,255,255,.8);
+  box-shadow:var(--bevel);padding:3.5px 10px;letter-spacing:.01em;
+  transition:transform .16s var(--ease),background-color .16s,border-color .16s;
+}
+.chip:hover{transform:translateY(-1px);background-color:#fff;border-color:rgba(89,139,253,.3)}
+.chip.acc{border-color:rgba(89,139,253,.26)}
+
+/* ------------------------------------------------------------
+   2+3 列表 / 卡片：统一「一张纸」的配方
+   1px 细线 + 内高光 + 贴地阴影，悬停只抬 1px
+   ------------------------------------------------------------ */
+.titem{
+  border:1px solid rgba(16,24,40,.06);box-shadow:var(--edge),var(--lift-1);
+  transition:transform .2s var(--ease),box-shadow .2s,border-color .2s,background-color .2s;
+}
+.titem:hover{
+  transform:translateY(-1px);background-color:rgba(255,255,255,.9);
+  border-color:rgba(89,139,253,.3);box-shadow:0 0 0 1px rgba(255,255,255,.9),var(--lift-2);
+}
+.titem .no{font-variant-numeric:tabular-nums}
+.titem .badge{box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+
+.frame,.card,.comp,.bench,.hist,.pdetail,.video,.filmplate{
+  border:1px solid rgba(16,24,40,.06);
+  box-shadow:var(--edge),var(--lift-2);
+}
+.frame{transition:transform .22s var(--ease),box-shadow .22s,border-color .22s}
+.frame:hover{transform:translateY(-2px)}
+.card{transition:transform .22s var(--ease),box-shadow .22s,border-color .22s}
+.card:hover{transform:translateY(-2px)}
+.splist > .sp{transition:transform .2s var(--ease),box-shadow .2s,border-color .2s}
+.splist > .sp:hover{transform:translateY(-1px)}
+.tablewrap{border:1px solid rgba(16,24,40,.06);box-shadow:var(--edge),var(--lift-2)}
+tbody tr{transition:background-color .14s}
+.hrow{transition:background-color .16s,box-shadow .16s}
+.hrow:hover{background-color:rgba(255,255,255,.5)}
+
+/* 小圆按钮（复制）：不给边就在白纸上飘成一行字 */
+.minibtn,.pd-lb button{border:1px solid rgba(16,24,40,.1);background-color:rgba(255,255,255,.86);color:var(--ink-2);box-shadow:var(--bevel)}
+.minibtn:hover,.pd-lb button:hover{background-color:#fff;border-color:rgba(89,139,253,.36);color:#2F62D8;transform:none}
+
+/* 提示词块：代码感的一块浅纸 */
+.pdetail pre{border:var(--hair);box-shadow:inset 0 1px 0 #fff;line-height:1.8}
+.pd-group.hl{box-shadow:inset 0 0 0 1px rgba(89,139,253,.2),inset 0 1px 0 #fff}
+.pd-gh .sp{color:var(--ink-2)}
+
+/* ------------------------------------------------------------
+   6 数据条：五格便当盒，而不是一条被竖线切开的横条
+   ------------------------------------------------------------ */
+.stats{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;
+  border:0;background-color:transparent;margin-top:34px;
+  backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;padding:0;
+}
+.stats .stat{
+  background-color:rgba(255,255,255,.62);border:1px solid rgba(16,24,40,.055);border-radius:16px;
+  padding:16px 16px 14px;box-shadow:var(--edge),var(--lift-1);
+  transition:transform .2s var(--ease),box-shadow .2s,background-color .2s;
+  border-left:1px solid rgba(16,24,40,.055);
+}
+.stats .stat:first-child{padding-left:16px}
+.stats .stat:hover{
+  transform:translateY(-2px);background-color:rgba(255,255,255,.78);
+  box-shadow:0 0 0 1px rgba(255,255,255,.5),var(--lift-2);
+}
+.stats .stat .n{font-size:29px;line-height:1.1}
+.stats .stat .k{margin-top:6px;letter-spacing:.1em}
+
+/* 顶栏：细到下缘只剩一条线 */
+.topbar{border-bottom:1px solid rgba(16,24,40,.06)}
+.navlinks a::after{height:1.5px;border-radius:2px}
+.brand-mark{border-radius:9px}
+
+/* 标签胶囊 */
+.tag{box-shadow:var(--bevel);font-size:10px;letter-spacing:.09em}
+.apibar{border-top:1px solid rgba(16,24,40,.06);border-bottom:1px solid rgba(16,24,40,.06)}
+
+/* 效率条：轨道压深一档，填充用同一套渐变，数字用等宽 */
+.bar{background-color:rgba(16,24,40,.075);height:6px}
+.bar .fill{box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.brow b{color:var(--ink-2);font-weight:600}
+.legend i{box-shadow:0 0 0 1px rgba(255,255,255,.6)}
+
+/* ------------------------------------------------------------
+   窄屏：便当盒降成两列，细边距收紧
+   ------------------------------------------------------------ */
+/* 平板上单列后输入框会被拉到 900 宽，一个字配一整行很空：给表单一个上限并居中
+   （只在这个区间生效，桌面 340 面板与手机满宽都不受影响） */
+@media (min-width:561px) and (max-width:1120px){
+  .panel{max-width:620px;margin-left:auto;margin-right:auto}
+}
+@media (max-width:1120px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .stats .stat{border-top:1px solid rgba(16,24,40,.055);border-radius:14px;padding:14px 14px 12px}
+  .stats .stat:first-child{padding-left:14px}
+  .stats .stat:last-child{grid-column:1/-1}
+  .stats .stat .n{font-size:26px}
+}
+@media (max-width:560px){
+  input,select,textarea{font-size:14px;min-height:42px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats .stat{padding:13px 13px 11px}
+  .stats .stat .n{font-size:24px}
+  .panel .row2{padding:11px 11px 0;gap:8px}
+  .btn{font-size:13px;min-height:42px}
+}
+
+/* 系统降级：用户要求减少动效时，位移全部取消 */
+@media (prefers-reduced-motion:reduce){
+  .btn:hover,.titem:hover,.frame:hover,.card:hover,.chip:hover,.stat:hover,.pbtn:hover{transform:none}
+}

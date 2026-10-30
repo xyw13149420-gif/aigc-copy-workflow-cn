@@ -1,0 +1,23 @@
+# 依赖与 Python 缓存
+node_modules/
+__pycache__/
+*.pyc
+
+# 本地调试产物：CDP 截图脚本、页面快照、Chrome 调试 profile（曾堆到 600MB+）
+.tmp/
+*.log
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# WorkBuddy 工作目录（会话记忆、发布标记由本地工具维护，不入库）
+.workbuddy/
+.workbuddy-ai/
+*.genie
+
+# 本地回归用的测试桩（.tmp/mkstub.js 每次重建，不是站点内容）
+public/__t.html
+public/__before.html
