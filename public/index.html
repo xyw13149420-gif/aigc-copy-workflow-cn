@@ -1230,13 +1230,13 @@ body{font-feature-settings:"tnum" 1,"cv11" 1}
 /* ------------------------------------------------------------
    3+1 输入类控件：细边框 + 内高光 + 焦点环
    ------------------------------------------------------------ */
-input,select,textarea{
+input,select,textarea,.sel-face{
   border:1px solid rgba(16,24,40,.12);border-radius:12px;background-color:var(--fill-2);
   box-shadow:var(--sink);
   font-size:13.5px;padding:10px 12px;min-height:40px;
   transition:border-color .18s,box-shadow .18s,background-color .18s;
 }
-input:hover,select:hover,textarea:hover{
+input:hover,select:hover,textarea:hover,.sel-face:hover{
   border-color:rgba(89,139,253,.42);background-color:#fff;
   box-shadow:inset 0 1px 2px rgba(16,24,40,.05),0 1px 4px -1px rgba(46,84,158,.14);
 }
@@ -1438,6 +1438,146 @@ tbody tr{transition:background-color .14s}
 .legend i{box-shadow:0 0 0 1px rgba(255,255,255,.6)}
 
 /* ------------------------------------------------------------
+   下拉：标题条数 / 发布平台
+   原生 <select> 的弹层是操作系统画的——白底直角、系统蓝整条高亮、
+   还会盖住下面的按钮。这里把界面换成和商品列表同一个组件，
+   原生 select 只留「取值 + 派发 change」两件事。
+   ------------------------------------------------------------ */
+.sel{position:relative;display:block}
+.sel-native{
+  position:absolute;left:0;top:0;width:1px;height:1px;min-height:0;padding:0;border:0;
+  opacity:0;pointer-events:none;
+}
+.sel-face{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer;
+  font-family:var(--sans);color:var(--ink);line-height:1.4;
+}
+.sel-face .sv{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-arrow{flex:0 0 auto;color:var(--ink-3);transition:transform .22s var(--ease),color .2s}
+.sel.open .sel-face{
+  border-color:rgba(89,139,253,.85);background-color:#fff;
+  box-shadow:var(--ring),inset 0 1px 2px rgba(16,24,40,.03);
+}
+.sel.open .sel-arrow{transform:rotate(180deg);color:var(--accent)}
+.sel-list{max-height:238px}
+.sel-list .citem{justify-content:space-between}
+.sel-list .citem.on{background-color:rgba(89,139,253,.09)}
+/* 商品列表里「· 当前」是给输入框做提示的，这里用底色表示就够 */
+.sel-list .citem.on .cn::after{content:""}
+.sel-list .citem .cs{font-family:var(--sans);font-size:11px;color:var(--ink-3)}
+.sel-list .citem .ck{
+  flex:0 0 auto;width:12px;text-align:center;padding:0;border-radius:0;
+  background-color:transparent;color:var(--accent);font-size:11px;
+}
+
+/* ------------------------------------------------------------
+   到手价：单位进框 + 补回上下步进
+   原生 spinner 在下面被藏掉了（两个灰块很脏），所以自带一对按钮。
+   ------------------------------------------------------------ */
+.numbox{
+  display:flex;align-items:center;min-height:40px;padding:0 5px 0 12px;
+  border:1px solid rgba(16,24,40,.12);border-radius:12px;
+  background-color:var(--fill-2);box-shadow:var(--sink);
+  transition:border-color .18s,box-shadow .18s,background-color .18s;
+}
+.numbox:hover{
+  border-color:rgba(89,139,253,.42);background-color:#fff;
+  box-shadow:inset 0 1px 2px rgba(16,24,40,.05),0 1px 4px -1px rgba(46,84,158,.14);
+}
+.numbox:focus-within{
+  border-color:rgba(89,139,253,.85);background-color:#fff;
+  box-shadow:var(--ring),inset 0 1px 2px rgba(16,24,40,.03);
+}
+.numbox input{
+  flex:0 0 auto;width:3.05ch;min-width:0;min-height:0;padding:11px 0;
+  border:0;background-color:transparent;box-shadow:none;
+  font-size:13.5px;font-weight:560;letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;
+}
+.numbox input:hover,.numbox input:focus{
+  border:0;background-color:transparent;box-shadow:none;
+}
+.nb-unit{flex:0 0 auto;margin-left:1px;font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
+.nb-step{margin-left:auto;flex:0 0 auto;display:flex;flex-direction:column}
+.nb-step button{
+  width:22px;height:16px;display:grid;place-items:center;padding:0;border:0;
+  background-color:transparent;color:#8494AA;cursor:pointer;border-radius:5px;
+  transition:background-color .14s,color .14s;
+}
+.nb-step button:hover{background-color:rgba(89,139,253,.13);color:#2F62D8}
+.nb-step button:active{background-color:rgba(89,139,253,.22)}
+
+/* ------------------------------------------------------------
+   生成记录：左右要留内边距，序号和按钮不能贴着卡片边线
+   ------------------------------------------------------------ */
+.hist{padding:8px 16px}
+.hrow{grid-template-columns:40px minmax(0,1fr) 112px 138px;gap:10px;padding:11px 0}
+.hrow .acts{gap:1px}
+.hrow .acts button,.hrow .acts a{
+  border:1px solid transparent;border-radius:7px;padding:3px 7px;
+  background-color:transparent;
+  transition:background-color .14s,color .14s,border-color .14s;
+}
+.hrow .acts button:hover,.hrow .acts a:hover{
+  background-color:rgba(89,139,253,.11);color:#2F62D8;border-color:transparent;
+}
+.hrow .acts .del{width:26px;padding:3px 0;display:grid;place-items:center;color:#9AA7BA}
+.hrow .acts .del:hover{background-color:rgba(203,60,45,.1);color:#C0392B}
+.hrow .acts .del svg{pointer-events:none}
+
+/* ------------------------------------------------------------
+   危险操作确认（删除记录）：压暗 + 居中
+   遮罩吃满视口，背景既点不到、也 Tab 不到
+   ------------------------------------------------------------ */
+.mask{
+  position:fixed;inset:0;z-index:400;display:grid;place-items:center;padding:22px;
+  background-color:rgba(12,20,34,.46);
+  backdrop-filter:blur(4px) saturate(1.05);-webkit-backdrop-filter:blur(4px) saturate(1.05);
+  opacity:0;transition:opacity .2s var(--ease);
+}
+.mask[hidden]{display:none}
+.mask.on{opacity:1}
+.modal{
+  width:min(430px,100%);padding:24px 24px 18px;border-radius:22px;
+  background-color:rgba(255,255,255,.975);border:1px solid rgba(255,255,255,.92);
+  box-shadow:0 40px 80px -40px rgba(8,16,32,.75),0 2px 10px rgba(8,16,32,.1);
+  transform:translateY(12px) scale(.97);opacity:0;
+  transition:transform .26s var(--ease),opacity .2s var(--ease);
+}
+.mask.on .modal{transform:none;opacity:1}
+.dlg-ico{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px;
+  color:#C0392B;background-color:rgba(203,60,45,.1);border:1px solid rgba(203,60,45,.18);
+}
+.modal h4{margin:0 0 7px;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.dlg-d{margin:0;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
+.dlg-d b{color:var(--ink);font-weight:600}
+.dlg-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+/* 面板里的按钮是满宽的，弹窗里得收回成内容宽度 */
+.dlg-acts .btn{width:auto;flex:0 0 auto;min-width:84px;justify-content:center}
+.btn.danger{
+  border:0;background-image:linear-gradient(118deg,#E15A40,#C33327);color:#fff;font-weight:560;
+  box-shadow:0 10px 22px -14px rgba(190,50,36,.9),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.btn.danger:hover{
+  transform:translateY(-1px);filter:brightness(1.05);color:#fff;
+  box-shadow:0 16px 30px -16px rgba(190,50,36,1),inset 0 1px 0 rgba(255,255,255,.34);
+}
+.btn.danger:active{transform:translateY(0) scale(.99)}
+
+/* ------------------------------------------------------------
+   提示词面板：标题钉在原地，正文从被点的卡片那里长出来
+   ------------------------------------------------------------ */
+.pd-body{
+  border:1px solid rgba(89,139,253,.22);border-radius:14px;
+  background-color:rgba(89,139,253,.045);
+  padding:13px 14px 14px;
+  box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(16,24,40,.03);
+  transform-origin:0 0;
+}
+.pd-body .pd-gh{margin-bottom:10px}
+
+/* ------------------------------------------------------------
    窄屏：便当盒降成两列，细边距收紧
    ------------------------------------------------------------ */
 /* 平板上单列后输入框会被拉到 900 宽，一个字配一整行很空：给表单一个上限并居中
@@ -1452,8 +1592,16 @@ tbody tr{transition:background-color .14s}
   .stats .stat:last-child{grid-column:1/-1}
   .stats .stat .n{font-size:26px}
 }
+@media (max-width:960px){
+  .hist{padding:8px 12px}
+  .hrow{grid-template-columns:32px minmax(0,1fr) 80px;gap:8px}
+  /* 窄屏只留「载入」和删除，导出那两个在记录里很少用到 */
+  .hrow .acts .mdbtn{display:none}
+}
 @media (max-width:560px){
-  input,select,textarea{font-size:14px;min-height:42px}
+  input,select,textarea,.sel-face{font-size:14px;min-height:42px}
+  .numbox{min-height:42px}
+  .numbox input{font-size:14px}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stats .stat{padding:13px 13px 11px}
   .stats .stat .n{font-size:24px}
@@ -1525,12 +1673,23 @@ tbody tr{transition:background-color .14s}
       <div class="adapt only-inline" id="f-adapt"></div>
       <div class="row2">
         <div class="field">
-          <label>到手价 <span>元</span></label>
-          <input id="f-price" type="number" value="129" min="1" step="1">
+          <label>到手价</label>
+          <div class="numbox" id="price-box">
+            <input id="f-price" type="number" value="129" min="1" step="1" inputmode="decimal" aria-label="到手价，单位元">
+            <span class="nb-unit">元</span>
+            <span class="nb-step">
+              <button type="button" data-step="1" aria-label="加一元" tabindex="-1">
+                <svg width="8" height="5" viewBox="0 0 8 5" aria-hidden="true"><path d="M1 4 4 1l3 3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button type="button" data-step="-1" aria-label="减一元" tabindex="-1">
+                <svg width="8" height="5" viewBox="0 0 8 5" aria-hidden="true"><path d="M1 1l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </span>
+          </div>
         </div>
         <div class="field">
           <label>标题条数</label>
-          <select id="f-count">
+          <select id="f-count" data-unit="条">
             <option>3</option><option>4</option><option selected>5</option>
             <option>6</option><option>7</option><option>8</option>
           </select>
@@ -1701,6 +1860,21 @@ tbody tr{transition:background-color .14s}
     <span class="only-inline"><code>seed</code> 可复现 · 数字为演示占位，投放前须替换为实测值</span>
     <span class="only-site">每次生成存于云端记录（公开可见） · 数字为演示占位，投放前须替换为实测值</span>
   </footer>
+</div>
+
+<!-- 危险操作确认：只有点了「删除」才会出现，出来时背景不可操作 -->
+<div class="mask" id="dlg" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dlg-t" aria-describedby="dlg-d">
+    <div class="dlg-ico" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 8.4v5.2M12 16.9v.1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20.2h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <h4 id="dlg-t">删除这条记录？</h4>
+    <p class="dlg-d" id="dlg-d"></p>
+    <div class="dlg-acts">
+      <button type="button" class="btn ghost" id="dlg-no">取消</button>
+      <button type="button" class="btn danger" id="dlg-yes">删除</button>
+    </div>
+  </div>
 </div>
 
 <script>const BUILD_MODE = 'site';</script>
@@ -5226,6 +5400,164 @@ tbody tr{transition:background-color .14s}
     };
   }
 
+  // ---------------------------------------------------------- 控件
+  /* 原生 select 的弹层是操作系统画的：白底、直角、系统蓝整条高亮，还会盖住下面的按钮。
+     换成和商品下拉同一套「按钮 + 浮层」，原生 select 缩成 1px 只负责取值和派发 change。 */
+  const SEL_ARROW = '<svg class="sel-arrow" width="11" height="7" viewBox="0 0 11 7" aria-hidden="true"><path d="M1 1.1 5.5 5.6 10 1.1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function enhanceSelect(sel) {
+    if (!sel || sel.dataset.enhanced) return;
+    sel.dataset.enhanced = '1';
+    const unit = sel.dataset.unit || '';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'combo sel';
+    const face = document.createElement('button');
+    face.type = 'button';
+    face.className = 'sel-face';
+    face.setAttribute('aria-haspopup', 'listbox');
+    face.setAttribute('aria-expanded', 'false');
+    face.innerHTML = '<span class="sv"></span>' + SEL_ARROW;
+    const list = document.createElement('div');
+    list.className = 'combo-list sel-list';
+    list.setAttribute('role', 'listbox');
+
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(face);
+    wrap.appendChild(list);
+    wrap.appendChild(sel);
+    sel.classList.add('sel-native');
+
+    const labelOf = (opt) => (opt ? opt.textContent + (unit ? ' ' + unit : '') : '');
+    const paint = () => {
+      face.querySelector('.sv').textContent = labelOf(sel.options[sel.selectedIndex]);
+      list.innerHTML = Array.from(sel.options).map((o) => {
+        const m = /^(.+?)（(.+)）$/.exec(o.textContent);
+        const nm = m ? m[1] : o.textContent + (unit ? ' ' + unit : '');
+        const on = o.value === sel.value;
+        return `<div class="citem${on ? ' on' : ''}" role="option" data-v="${esc(o.value)}"${on ? ' aria-selected="true"' : ''}>` +
+          `<span class="cn">${esc(nm)}</span>` +
+          (m ? `<span class="cs">${esc(m[2])}</span>` : '') +
+          `<span class="ck">${on ? '✓' : ''}</span></div>`;
+      }).join('');
+    };
+    const close = () => { wrap.classList.remove('open'); face.setAttribute('aria-expanded', 'false'); };
+    const open = () => { paint(); wrap.classList.add('open'); face.setAttribute('aria-expanded', 'true'); };
+
+    face.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (wrap.classList.contains('open')) close();
+      else open();
+    });
+    face.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!wrap.classList.contains('open')) { open(); return; }
+        const i = sel.selectedIndex + (e.key === 'ArrowDown' ? 1 : -1);
+        if (i < 0 || i >= sel.options.length) return;
+        sel.selectedIndex = i;
+        paint();
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+    // mousedown 先于 blur：不然点选项时浮层先收起，点击就落空了
+    list.addEventListener('mousedown', (e) => {
+      const it = e.target.closest('.citem');
+      if (!it) return;
+      e.preventDefault();
+      sel.value = it.dataset.v;
+      close();
+      paint();
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+    // 外部（比如载入记录）直接写了 select.value 时，把界面同步回来
+    sel.addEventListener('change', paint);
+    sel.__paint = paint;
+    paint();
+  }
+
+  function syncSelects() {
+    ['f-count', 'f-platform'].forEach((id) => {
+      const el = $(id);
+      if (el && el.__paint) el.__paint();
+    });
+  }
+
+  /* 到手价：单位进框以后，输入框宽度得跟着数字走，否则「元」会飘到很远的地方 */
+  function fitNum() {
+    const el = $('f-price');
+    if (!el) return;
+    const n = String(el.value || '').length || 1;
+    el.style.width = Math.max(1.6, n + 0.4) + 'ch';
+  }
+
+  function bindNumBox() {
+    const box = $('price-box');
+    const el = $('f-price');
+    if (!box || !el) return;
+    Array.from(box.querySelectorAll('.nb-step button')).forEach((b) => {
+      b.addEventListener('click', () => {
+        const min = el.min === '' ? 0 : Number(el.min);
+        const now = Number(el.value) || 0;
+        el.value = Math.max(min, now + Number(b.dataset.step));
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        fitNum();
+      });
+    });
+    el.addEventListener('input', fitNum);
+    fitNum();
+  }
+
+  /* 危险操作确认：压暗背景 + 居中弹窗；出来时背景既点不到也 Tab 不到 */
+  function confirmDialog(opts) {
+    const mask = $('dlg');
+    if (!mask) return Promise.resolve(false);
+    const o = opts || {};
+    $('dlg-t').textContent = o.title || '确认执行这个操作？';
+    $('dlg-d').innerHTML = o.desc || '';
+    $('dlg-yes').textContent = o.okText || '确认';
+    $('dlg-yes').className = 'btn ' + (o.danger === false ? 'primary' : 'danger');
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const prevFocus = document.activeElement;
+      const prevOverflow = document.body.style.overflow;
+
+      const finish = (ok) => {
+        if (settled) return;
+        settled = true;
+        document.removeEventListener('keydown', onKey, true);
+        mask.classList.remove('on');
+        document.body.style.overflow = prevOverflow;
+        setTimeout(() => { mask.hidden = true; }, 220);
+        if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (e) { /* 元素可能已经不在了 */ } }
+        resolve(ok);
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); finish(false); return; }
+        if (e.key === 'Tab') {
+          const btns = [$('dlg-no'), $('dlg-yes')];
+          e.preventDefault();
+          const i = btns.indexOf(document.activeElement);
+          const next = i < 0 ? (e.shiftKey ? 1 : 0) : (i + (e.shiftKey ? btns.length - 1 : 1)) % btns.length;
+          btns[next].focus();
+        }
+      };
+
+      $('dlg-no').onclick = () => finish(false);
+      $('dlg-yes').onclick = () => finish(true);
+      mask.onmousedown = (e) => { if (e.target === mask) finish(false); };
+      mask.hidden = false;
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', onKey, true);
+      requestAnimationFrame(() => mask.classList.add('on'));
+      setTimeout(() => { try { $('dlg-no').focus(); } catch (e) { /* 忽略 */ } }, 60);
+    });
+  }
+
   // ---------------------------------------------------------- 静态统计
   function renderStats() {
     const s = TEMPLATES.sections;
@@ -5361,13 +5693,22 @@ tbody tr{transition:background-color .14s}
     renderPdetail();
   }
 
-  // 提示词正文单独一块地方：图片和镜头分成两组，各自中英两段
+  // 提示词正文：一次只摊开一组——点了「图片」就只看图片，不再把镜头一起铺出来。
+  // 标题钉在原地不动，正文从刚才点的那个按钮的位置长出来。
+  let lastPromptRect = null;
+
   function renderPdetail() {
     const host = $('out-pdetail');
     if (!host) return;
     const s = shotPlan && promptIdx >= 0 ? shotPlan.shots[promptIdx] : null;
-    if (!s) { host.hidden = true; host.innerHTML = ''; return; }
-    host.hidden = false;
+    if (!s) { collapsePdetail(); return; }
+
+    const isImg = promptKey !== 'cam';
+    const prevI = host.dataset.i;
+    const prevK = host.dataset.k;
+    // 同一格换组只做交叉淡入，别再整块从卡片缩放一次
+    const switching = !host.hidden && prevI === String(promptIdx) && prevK && prevK !== promptKey;
+
     const pair = (zk, ek) => `
       <div class="pd-pair">
         <div class="pd-block">
@@ -5379,28 +5720,101 @@ tbody tr{transition:background-color .14s}
           <pre>${esc(s[ek])}</pre>
         </div>
       </div>`;
+
+    host.hidden = false;
+    host.dataset.i = String(promptIdx);
+    host.dataset.k = promptKey;
     host.innerHTML = `
       <div class="pd-hd">
         <span class="pd-t">${esc(s.range)} · ${esc(s.stage)}</span>
         ${s.alt.length ? `<span class="alt">备选镜头：${esc(s.alt.join('；'))}</span>` : ''}
-        <span class="pd-act"><button class="minibtn" data-act="pd-close">收起</button></span>
+        <span class="pd-act">
+          <button class="minibtn" data-act="pd-switch" data-k="${isImg ? 'cam' : 'img'}">看${isImg ? '镜头' : '图片'}提示词</button>
+          <button class="minibtn" data-act="pd-close">收起</button>
+        </span>
       </div>
-      <div class="pd-groups">
-        <section class="pd-group${promptKey === 'img' ? ' hl' : ''}">
-          <div class="pd-gh">
-            <span class="t">图片提示词</span><span class="d">画什么 · 拿去生图（即梦 / MJ / Nano Banana）</span>
-            <span class="sp"><button class="minibtn" data-act="pd-copy" data-k="img">复制中英两段</button></span>
-          </div>
-          ${pair('img_zh', 'img_en')}
-        </section>
-        <section class="pd-group${promptKey === 'cam' ? ' hl' : ''}">
-          <div class="pd-gh">
-            <span class="t">镜头提示词</span><span class="d">怎么拍 · 景别 / 机位 / 焦段 / 运动 / 节奏</span>
-            <span class="sp"><button class="minibtn" data-act="pd-copy" data-k="cam">复制中英两段</button></span>
-          </div>
-          ${pair('cam_zh', 'cam_en')}
-        </section>
-      </div>`;
+      <section class="pd-body">
+        <div class="pd-gh">
+          <span class="t">${isImg ? '图片提示词' : '镜头提示词'}</span>
+          <span class="d">${isImg ? '画什么 · 拿去生图（即梦 / MJ / Nano Banana）' : '怎么拍 · 景别 / 机位 / 焦段 / 运动 / 节奏'}</span>
+          <span class="sp"><button class="minibtn" data-act="pd-copy" data-k="${isImg ? 'img' : 'cam'}">复制中英两段</button></span>
+        </div>
+        ${isImg ? pair('img_zh', 'img_en') : pair('cam_zh', 'cam_en')}
+      </section>`;
+
+    const bodyEl = host.querySelector('.pd-body');
+    if (!bodyEl) return;
+    if (switching) {
+      bodyEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
+    } else {
+      expandFrom(bodyEl, lastPromptRect);
+    }
+  }
+
+  // 从「被点的那个按钮」的矩形放大到面板的矩形（FLIP）。只为 transform 和透明度做动画，
+  // 不改高度也不改位置，所以标题在整个过程里是钉死的。
+  function expandFrom(bodyEl, fallbackRect) {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const host = $('out-pdetail');
+
+    // 面板有可能落在视口外：先把页面挪到位，再量几何。
+    // 顺序很重要——先滚动、再量、最后动画，否则动画途中页面还在动，看起来像在飞。
+    // 只滚「刚好够看见」的那一段（等于 scrollIntoView 的 nearest），不做整屏跳转。
+    const seen = host.getBoundingClientRect();
+    const vh = window.innerHeight || 800;
+    let delta = 0;
+    if (seen.bottom > vh - 24) delta = Math.min(seen.bottom - (vh - 24), Math.max(0, seen.top - 88));
+    else if (seen.top < 56) delta = seen.top - 88;
+    if (delta) {
+      // 必须 instant：html 上开了 scroll-behavior:smooth，用默认值会边滚边放大
+      window.scrollBy({ top: delta, behavior: 'instant' });
+    }
+
+    // 滚动之后重新量：按钮和面板都跟着页面走过了，必须用同一个滚动状态下的坐标
+    const live = document.querySelector('.pbtn.on');
+    const src = (live ? live.getBoundingClientRect() : null) || fallbackRect;
+    const dst = bodyEl.getBoundingClientRect();
+    if (reduce || !dst.width || !dst.height || !src) {
+      bodyEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
+      return;
+    }
+    const sx = Math.max(0.05, Math.min(1, src.width / dst.width));
+    const sy = Math.max(0.05, Math.min(1, src.height / dst.height));
+    const dx = src.left - dst.left;
+    const dy = src.top - dst.top;
+
+    bodyEl.animate([
+      { transform: `translate(${dx}px,${dy}px) scale(${sx},${sy})`, opacity: 0, borderRadius: '9px' },
+      { transform: 'translate(0,0) scale(1,1)', opacity: 1, borderRadius: '14px' },
+    ], { duration: 430, easing: 'cubic-bezier(.22,.68,.2,1)' });
+
+    // 文字比外框晚一点出现：放大过程里被拉扁的字就不会被看清
+    Array.from(bodyEl.children).forEach((el, i) => {
+      el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 260, delay: 120 + i * 60, fill: 'backwards', easing: 'ease-out' });
+    });
+  }
+
+  function collapsePdetail() {
+    const host = $('out-pdetail');
+    if (!host || host.hidden) {
+      if (host) { host.hidden = true; host.innerHTML = ''; host.removeAttribute('data-i'); host.removeAttribute('data-k'); }
+      return;
+    }
+    const bodyEl = host.querySelector('.pd-body');
+    const dst = bodyEl && bodyEl.getBoundingClientRect();
+    if (!bodyEl || !dst || !dst.width) { host.hidden = true; host.innerHTML = ''; return; }
+    const src = lastPromptRect || dst;
+    const sx = Math.max(0.05, Math.min(1, src.width / dst.width));
+    const sy = Math.max(0.05, Math.min(1, src.height / dst.height));
+    const anim = bodyEl.animate([
+      { transform: 'none', opacity: 1 },
+      { transform: `translate(${src.left - dst.left}px,${src.top - dst.top}px) scale(${sx},${sy})`, opacity: 0 },
+    ], { duration: 220, easing: 'cubic-bezier(.4,0,.7,1)' });
+    anim.onfinish = () => {
+      host.hidden = true; host.innerHTML = '';
+      host.removeAttribute('data-i'); host.removeAttribute('data-k');
+    };
   }
 
   /* 图片统一缩到 720 宽再存：原图直接塞 localStorage 三五张就把配额撑爆 */
@@ -5874,11 +6288,18 @@ tbody tr{transition:background-color .14s}
     render,
     params,
     esc,
+    confirm: confirmDialog,
+    syncSelects,
+    fitNum,
     markdownOf: (r, p) => toMarkdown(r, p),
     csvOf: (r) => csvOf(r),
     isSite: BUILD_MODE === 'site',
     get last() { return last; },
   };
+
+  // 控件初始化：两个 select 换成同款下拉，到手价补上步进与单位
+  ['f-count', 'f-platform'].forEach((id) => enhanceSelect($(id)));
+  bindNumBox();
 
   // 播放位置落在哪一段，就高亮哪一行脚本（视频与预演共用）
   filmSync = () => {
@@ -5905,14 +6326,11 @@ tbody tr{transition:background-color .14s}
     if (act === 'prompt') {
       const k = btn.dataset.k || 'img';
       const same = promptIdx === i && promptKey === k;
+      // 先记下按钮的位置，动画要从这里长出来
+      if (!same) lastPromptRect = btn.getBoundingClientRect();
       promptIdx = same ? -1 : i;
       promptKey = k;
       renderBoard(last.r);
-      const box = $('out-pdetail');
-      if (box && promptIdx >= 0) {
-        const g = box.querySelectorAll('.pd-group')[k === 'cam' ? 1 : 0];
-        (g || box).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
       return;
     }
     if (act === 'up' || act === 'paste') { pickShot(i); return; }
@@ -5931,6 +6349,14 @@ tbody tr{transition:background-color .14s}
     const s = shotPlan.shots[promptIdx];
     const act = btn.dataset.act;
     if (act === 'pd-close') { promptIdx = -1; renderBoard(last.r); return; }
+    if (act === 'pd-switch') {
+      // 面板里直接切到另一组，省得回头再去点卡片
+      const k = btn.dataset.k;
+      if (promptIdx < 0 || !k) return;
+      promptKey = k;
+      renderBoard(last.r);
+      return;
+    }
     if (act === 'pd-copy') {
       const k = btn.dataset.k;
       if (k === 'img') return clip('【图片提示词 · 中文】\n' + s.img_zh + '\n\n【Image prompt · English】\n' + s.img_en, '图片提示词已复制（中英两段）');
@@ -6066,6 +6492,6 @@ tbody tr{transition:background-color .14s}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js"></script>
 <script>window.CLOUD_CONFIG = {"endpoint":"https://aigc-copy-workflow.app.workbuddy.host","oauthRelayBaseUrl":"https://www.workbuddy.cn/v2/as/genie-baas/oauth","publishableKey":"wbpk_btvv6au53VSykk1X66h76l_bKCBpH02ZVI23WN4LozJk4Mk3dUjZNE6"};</script>
-<script src="app.js?v=7a6b34e88a"></script>
+<script src="app.js?v=8dba8a40dc"></script>
 </body>
 </html>

@@ -244,6 +244,7 @@
     ].join('');
 
     comboClose();
+    if (A.fitNum) A.fitNum();
     renderLocal();
   }
 
@@ -489,7 +490,8 @@
     }
 
     host.innerHTML = items.map(function (g) {
-      return '<div class="hrow' + (g.id === lastId ? ' cur' : '') + '" data-id="' + g.id + '">' +
+      return '<div class="hrow' + (g.id === lastId ? ' cur' : '') + '" data-id="' + g.id + '"' +
+        ' data-name="' + A.esc(g.product_name) + '">' +
         '<span class="hid">#' + g.id + '</span>' +
         '<span class="hp" title="' + A.esc(g.product_name) + '">' + A.esc(g.product_name) +
           ' · ' + A.esc(g.platform) + '<em>' + hhmm(g.created_at) + '</em></span>' +
@@ -498,8 +500,13 @@
           (g.tokens || 0) + 'tok</span>' +
         '<span class="acts">' +
           '<button type="button" data-act="load">载入</button>' +
-          '<button type="button" data-act="md">md</button>' +
-          '<button type="button" data-act="csv">csv</button>' +
+          '<button type="button" class="mdbtn" data-act="md">md</button>' +
+          '<button type="button" class="mdbtn" data-act="csv">csv</button>' +
+          '<button type="button" class="del" data-act="del" title="删除这条记录" aria-label="删除记录 #' + g.id + '">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">' +
+              '<path d="M4 6.6h16M9.6 6.6V5.2a1.6 1.6 0 0 1 1.6-1.6h1.6a1.6 1.6 0 0 1 1.6 1.6v1.4M17.4 6.6l-.7 12.2a2 2 0 0 1-2 1.9h-5.4a2 2 0 0 1-2-1.9L6.6 6.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>' +
+          '</button>' +
         '</span>' +
       '</div>';
     }).join('');
@@ -524,6 +531,9 @@
       if (prm.platform) $('f-platform').value = prm.platform;
       if (prm.price) $('f-price').value = prm.price;
       if (prm.count) $('f-count').value = String(prm.count);
+      // 程序写进去的值不会触发 change：下拉按钮上的字和输入框宽度得手动对齐
+      if (A.syncSelects) A.syncSelects();
+      if (A.fitNum) A.fitNum();
 
       A.render(rec.result);
       lastId = rec.id;
@@ -535,6 +545,28 @@
         '<span class="sep">/</span>' + A.esc(rec.model || '模板')], false);
     } catch (e) {
       notice('载入失败：' + errText(e));
+    }
+  }
+
+  /* 删除一条记录：先压暗弹确认，确认之后才真的动云端 */
+  async function removeRecord(id) {
+    try {
+      var res = await cloud.database.from('generations').delete().eq('id', id);
+      if (res && res.error) throw res.error;
+      // 后端在「没有 DELETE 策略」时往往不报错，只是删了 0 行。
+      // 所以不能凭返回码宣布成功，必须回查一次。
+      var check = await cloud.database.from('generations').select('id').eq('id', id);
+      if (check && check.error) throw check.error;
+      if (((check && check.data) || []).length) {
+        notice('删除没有生效：这条记录还在云端。数据库目前只开放了「新增 / 读取」权限，' +
+          '缺一条 DELETE 策略，加上之后删除才会真的执行。');
+        return;
+      }
+      if (lastId === id) { lastId = null; updateExport(); }
+      await refreshHistory();
+      setBar(['已删除记录 <b>#' + id + '</b>', '<span class="sep">/</span>', '云端已同步'], true);
+    } catch (e) {
+      notice('删除失败：' + A.esc(errText(e)) + ' 记录还在，可以稍后再试。');
     }
   }
 
@@ -628,19 +660,26 @@
       if (comboEl.classList.contains('open')) comboClose();
       else { comboOpen(); $('f-product').focus(); }
     });
-    on($('f-product'), 'focus', function () {
-      if (!$('f-product').readOnly) comboOpen();
-    });
-    // 有的环境只管点了才算（键盘 Tab 进来走 focus，鼠标点进来走 click）
-    on($('f-product'), 'click', function () {
-      if (!comboEl.classList.contains('open')) comboOpen();
-    });
+    // 点输入框只是把光标放进去，不再顺手弹一屏列表：
+    // 想挑就让右边箭头展开，想搜就直接打字（打字才筛）。
     on($('f-product'), 'keydown', function (e) {
       var items = listEl.querySelectorAll('.citem');
       if (e.key === 'Escape') { comboClose(); return; }
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
-        if (!comboEl.classList.contains('open')) { comboOpen(); return; }
+        if (!comboEl.classList.contains('open')) {
+          // 键盘进来是先开列表、顺手就落在第一项上，不用再按一次
+          comboOpen();
+          var fresh = listEl.querySelectorAll('.citem');
+          if (!fresh.length) return;
+          actIdx = e.key === 'ArrowDown' ? 0 : fresh.length - 1;
+          Array.prototype.forEach.call(fresh, function (el, i) {
+            el.classList.toggle('act', i === actIdx);
+          });
+          fresh[actIdx].scrollIntoView({ block: 'nearest' });
+          return;
+        }
+        var items = listEl.querySelectorAll('.citem');
         if (!items.length) return;
         actIdx = e.key === 'ArrowDown'
           ? (actIdx + 1) % items.length
@@ -695,10 +734,22 @@
   on($('out-history'), 'click', function (e) {
     var btn = e.target.closest('button[data-act]');
     if (!btn) return;
-    var id = Number(btn.closest('.hrow').dataset.id);
+    var row = btn.closest('.hrow');
+    var id = Number(row && row.dataset.id);
+    if (!id) return;                       // 「正在读取…」那几行没有 id
     var act = btn.dataset.act;
-    if (act === 'load') loadRecord(id);
-    else exportRecord(id, act);
+    if (act === 'load') { loadRecord(id); return; }
+    if (act === 'del') {
+      var who = row.dataset.name || '';
+      A.confirm({
+        title: '删除这条记录？',
+        desc: '记录 <b>#' + id + '</b>' + (who ? '「' + A.esc(who) + '」' : '') +
+          ' 将从云端移除，删除后无法恢复，也导不回来了。',
+        okText: '删除',
+      }).then(function (ok) { if (ok) removeRecord(id); });
+      return;
+    }
+    exportRecord(id, act);
   });
 
   boot().catch(function (e) {
