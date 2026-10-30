@@ -22,8 +22,10 @@
 ## 结构
 
 ```
-copy_templates.json   模板库：标题骨架 / 卖点四段 / 话术场景 / 分镜 / 极限词表
-aigc_copywriter.py    Python 引擎（仅标准库），命令行入口
+copy_templates.json   模板库：标题骨架 / 卖点四段 / 话术场景 / 分镜 / 极限词表（build 与 Python 引擎共用）
+legacy/               第一代 Python 管线，站点不再依赖，留作可复现对照
+  aigc_copywriter.py    Python 引擎（仅标准库），命令行入口
+  aigc_samples.md       上面命令跑出来的示例输出
 src/
   engine.js           与 Python 逐字对齐的 JS 引擎（同种子同输出）
   facets.js           商品名 → 品类 / 物种 / 食材 / 功能 / 品牌的解析
@@ -50,8 +52,8 @@ npm run build
 npm start
 
 # 命令行生成（不需要联网，同种子同结果）
-python aigc_copywriter.py --product "无谷鲜肉成猫粮" --price 129 --spec 1.8kg \
-    --audience "1-3岁室内猫主人" --count 5 --seed 7 --out aigc_samples.md
+python legacy/aigc_copywriter.py --product "无谷鲜肉成猫粮" --price 129 --spec 1.8kg \
+    --audience "1-3岁室内猫主人" --count 5 --seed 7 --out legacy/aigc_samples.md
 ```
 
 ## 几个设计上的选择

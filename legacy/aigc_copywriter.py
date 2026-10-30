@@ -7,8 +7,8 @@
   本脚本                    —— 管变量注入与组合去重（占位符填充 / 30 字校验 / 超长回退 / 批次去重 / 合规替换 / 耗时测算）
 
 示例：
-  python aigc_copywriter.py --product "无谷鲜肉成猫粮" --price 129 --spec 1.8kg "`
-      --audience "1-3岁室内猫主人" --count 5 --seed 7 --out aigc_samples.md
+  python legacy/aigc_copywriter.py --product "无谷鲜肉成猫粮" --price 129 --spec 1.8kg "`
+      --audience "1-3岁室内猫主人" --count 5 --seed 7 --out legacy/aigc_samples.md
 """
 from __future__ import annotations
 
@@ -20,7 +20,14 @@ import re
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_TEMPLATES = os.path.join(SCRIPT_DIR, "copy_templates.json")
+# 模板库放在项目根目录，与 build.js 共用同一份；脚本在 legacy/ 下，需要向上找一级。
+_TEMPLATE_CANDIDATES = (
+    os.path.join(SCRIPT_DIR, "copy_templates.json"),
+    os.path.join(os.path.dirname(SCRIPT_DIR), "copy_templates.json"),
+)
+DEFAULT_TEMPLATES = next(
+    (p for p in _TEMPLATE_CANDIDATES if os.path.exists(p)), _TEMPLATE_CANDIDATES[-1]
+)
 
 MAX_TITLE_CHARS = 30
 MAX_CS_CHARS = 80
