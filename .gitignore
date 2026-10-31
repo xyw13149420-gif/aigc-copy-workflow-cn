@@ -21,3 +21,6 @@ Thumbs.db
 # 本地回归用的测试桩（.tmp/mkstub.js 每次重建，不是站点内容）
 public/__t.html
 public/__before.html
+
+# 验收时的临时截图，只留正式投稿那几张
+submission/shots/_verify/

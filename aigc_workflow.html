@@ -364,8 +364,9 @@ select{
 .pd-gh .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent)}
 .pd-gh .d{font-size:11px;color:var(--ink-3)}
 .pd-gh .sp{margin-left:auto;display:flex;gap:6px}
-.pd-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.pd-pair .pd-block{margin-top:0}
+/* 中英两栏：顶部标签、复制按钮、正文框都要落在同一条水平线上。
+   grid 默认 stretch，配合 block 纵向 flex + pre 撑满，两栏卡片底边也齐平。 */
+.pd-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
 @media (max-width:860px){.pd-pair{grid-template-columns:minmax(0,1fr)}}
 .pd-lb{
   font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
@@ -383,6 +384,9 @@ select{
   border:1px solid var(--line);border-radius:4px;padding:10px 12px;
 }
 .pd-block + .pd-block{margin-top:12px}
+/* 必须写在上面那条之后：同特异性，靠顺序覆盖，否则英文栏会被 12px 上边距顶下去 */
+.pd-pair>.pd-block{margin-top:0;display:flex;flex-direction:column;min-width:0}
+.pd-pair>.pd-block>pre{flex:1 1 auto}
 
 .bactions{margin-left:auto;display:flex;gap:6px;align-self:center;flex-wrap:wrap}
 /* 说明条：默认收起太靠上会压到下面的小标题，给它自己的边距，并且能关掉 */
@@ -1552,9 +1556,15 @@ tbody tr{transition:background-color .14s}
 .modal h4{margin:0 0 7px;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
 .dlg-d{margin:0;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
 .dlg-d b{color:var(--ink);font-weight:600}
-.dlg-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-/* 面板里的按钮是满宽的，弹窗里得收回成内容宽度 */
-.dlg-acts .btn{width:auto;flex:0 0 auto;min-width:84px;justify-content:center}
+.dlg-acts{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:20px}
+/* 面板里的按钮是满宽的，弹窗里得收回成内容宽度。
+   注意必须把 margin 也归零：模板里 .btn.ghost 带 margin-top:8px，
+   在 flex 里会把「取消」往下顶 8px 并被 stretch 压矮 8px，
+   结果两颗按钮高度和基线都不齐。尺寸、内边距、字号在这里统一钉死。 */
+.dlg-acts .btn{
+  width:auto;flex:0 0 auto;min-width:88px;min-height:40px;margin:0;
+  padding:0 18px;font-size:13px;display:inline-flex;align-items:center;justify-content:center;
+}
 .btn.danger{
   border:0;background-image:linear-gradient(118deg,#E15A40,#C33327);color:#fff;font-weight:560;
   box-shadow:0 10px 22px -14px rgba(190,50,36,.9),inset 0 1px 0 rgba(255,255,255,.28);
@@ -1569,6 +1579,7 @@ tbody tr{transition:background-color .14s}
    提示词面板：标题钉在原地，正文从被点的卡片那里长出来
    ------------------------------------------------------------ */
 .pd-body{
+  position:relative;overflow:hidden;
   border:1px solid rgba(89,139,253,.22);border-radius:14px;
   background-color:rgba(89,139,253,.045);
   padding:13px 14px 14px;
@@ -1576,6 +1587,16 @@ tbody tr{transition:background-color .14s}
   transform-origin:0 0;
 }
 .pd-body .pd-gh{margin-bottom:10px}
+/* 面板 5 秒无操作会自动收起：顶部走一条细进度条，让「它要关了」可预期，
+   而不是读到一半突然消失。keyframes 只在 .ticking 存在时跑，重置靠重挂 class。 */
+.pd-body.ticking::after{
+  content:'';position:absolute;left:0;top:0;height:2px;width:100%;
+  background-image:linear-gradient(90deg,rgba(89,139,253,.6),rgba(89,139,253,.16));
+  transform-origin:left center;
+  animation:pd-count 5s linear forwards;
+  pointer-events:none;
+}
+@keyframes pd-count{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
 /* ------------------------------------------------------------
    窄屏：便当盒降成两列，细边距收紧
@@ -5697,6 +5718,32 @@ tbody tr{transition:background-color .14s}
   // 标题钉在原地不动，正文从刚才点的那个按钮的位置长出来。
   let lastPromptRect = null;
 
+  // 面板 5 秒无操作就自己收起：不点它，就不该一直占着版面。
+  // 在面板里点、滚、按键都算「还在读」，重置成完整 5 秒；hover 不重置，
+  // 免得鼠标恰好压在上面时永远不关。
+  let pdIdleMs = 5000;
+  let pdIdleTimer = null;
+
+  function clearPdIdle() {
+    if (pdIdleTimer) { clearTimeout(pdIdleTimer); pdIdleTimer = null; }
+  }
+
+  function armPdIdle(bodyEl) {
+    clearPdIdle();
+    if (!bodyEl || promptIdx < 0) return;
+    // 重挂 class 倒计时条才会从满格重走；不重排浏览器认为动画没变化，不会重播
+    bodyEl.classList.remove('ticking');
+    void bodyEl.offsetWidth;
+    bodyEl.classList.add('ticking');
+    pdIdleTimer = setTimeout(() => {
+      pdIdleTimer = null;
+      // 到点前可能已经被手动收起或换了结果，别再动一次
+      if (promptIdx < 0 || !shotPlan || !last.r) return;
+      promptIdx = -1;
+      renderBoard(last.r);
+    }, pdIdleMs);
+  }
+
   function renderPdetail() {
     const host = $('out-pdetail');
     if (!host) return;
@@ -5749,6 +5796,8 @@ tbody tr{transition:background-color .14s}
     } else {
       expandFrom(bodyEl, lastPromptRect);
     }
+    // 每次展开、换组、换镜头都重新计时，读到一半被旧计时器收掉是最烦的
+    armPdIdle(bodyEl);
   }
 
   // 从「被点的那个按钮」的矩形放大到面板的矩形（FLIP）。只为 transform 和透明度做动画，
@@ -5796,6 +5845,7 @@ tbody tr{transition:background-color .14s}
   }
 
   function collapsePdetail() {
+    clearPdIdle();
     const host = $('out-pdetail');
     if (!host || host.hidden) {
       if (host) { host.hidden = true; host.innerHTML = ''; host.removeAttribute('data-i'); host.removeAttribute('data-k'); }
@@ -6295,6 +6345,9 @@ tbody tr{transition:background-color .14s}
     csvOf: (r) => csvOf(r),
     isSite: BUILD_MODE === 'site',
     get last() { return last; },
+    // 提示词面板无操作自动收起的时长，默认 5 秒；测试里可以调小
+    get pdIdleMs() { return pdIdleMs; },
+    set pdIdleMs(v) { const n = Number(v); if (n >= 0) pdIdleMs = n; },
   };
 
   // 控件初始化：两个 select 换成同款下拉，到手价补上步进与单位
@@ -6341,6 +6394,14 @@ tbody tr{transition:background-color .14s}
       renderFilm(last.r);
       flash('已还原成样张 / 空态');
     }
+  });
+
+  // 面板里的任何动作都算「还在读」：点按钮、滚轮、按 Tab 都重置 5 秒
+  ['pointerdown', 'wheel', 'keydown'].forEach((ev) => {
+    $('out-pdetail').addEventListener(ev, () => {
+      const bodyEl = $('out-pdetail').querySelector('.pd-body');
+      if (bodyEl) armPdIdle(bodyEl);
+    }, { passive: true });
   });
 
   $('out-pdetail').addEventListener('click', (e) => {

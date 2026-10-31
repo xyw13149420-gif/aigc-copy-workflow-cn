@@ -401,9 +401,15 @@ tbody tr{transition:background-color .14s}
 .modal h4{margin:0 0 7px;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
 .dlg-d{margin:0;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
 .dlg-d b{color:var(--ink);font-weight:600}
-.dlg-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-/* 面板里的按钮是满宽的，弹窗里得收回成内容宽度 */
-.dlg-acts .btn{width:auto;flex:0 0 auto;min-width:84px;justify-content:center}
+.dlg-acts{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:20px}
+/* 面板里的按钮是满宽的，弹窗里得收回成内容宽度。
+   注意必须把 margin 也归零：模板里 .btn.ghost 带 margin-top:8px，
+   在 flex 里会把「取消」往下顶 8px 并被 stretch 压矮 8px，
+   结果两颗按钮高度和基线都不齐。尺寸、内边距、字号在这里统一钉死。 */
+.dlg-acts .btn{
+  width:auto;flex:0 0 auto;min-width:88px;min-height:40px;margin:0;
+  padding:0 18px;font-size:13px;display:inline-flex;align-items:center;justify-content:center;
+}
 .btn.danger{
   border:0;background-image:linear-gradient(118deg,#E15A40,#C33327);color:#fff;font-weight:560;
   box-shadow:0 10px 22px -14px rgba(190,50,36,.9),inset 0 1px 0 rgba(255,255,255,.28);
@@ -418,6 +424,7 @@ tbody tr{transition:background-color .14s}
    提示词面板：标题钉在原地，正文从被点的卡片那里长出来
    ------------------------------------------------------------ */
 .pd-body{
+  position:relative;overflow:hidden;
   border:1px solid rgba(89,139,253,.22);border-radius:14px;
   background-color:rgba(89,139,253,.045);
   padding:13px 14px 14px;
@@ -425,6 +432,16 @@ tbody tr{transition:background-color .14s}
   transform-origin:0 0;
 }
 .pd-body .pd-gh{margin-bottom:10px}
+/* 面板 5 秒无操作会自动收起：顶部走一条细进度条，让「它要关了」可预期，
+   而不是读到一半突然消失。keyframes 只在 .ticking 存在时跑，重置靠重挂 class。 */
+.pd-body.ticking::after{
+  content:'';position:absolute;left:0;top:0;height:2px;width:100%;
+  background-image:linear-gradient(90deg,rgba(89,139,253,.6),rgba(89,139,253,.16));
+  transform-origin:left center;
+  animation:pd-count 5s linear forwards;
+  pointer-events:none;
+}
+@keyframes pd-count{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
 /* ------------------------------------------------------------
    窄屏：便当盒降成两列，细边距收紧
